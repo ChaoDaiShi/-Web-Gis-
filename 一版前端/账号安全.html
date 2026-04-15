@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>账号安全中心</title>
+    <style>
+      :root {
+        --brand: #33ccff;
+        --bg: #f3f7fb;
+        --card: #ffffff;
+        --line: #dbe3ee;
+        --text: #1f2937;
+        --muted: #6b7280;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+        background: radial-gradient(circle at top right, #e0f2fe 0%, var(--bg) 46%);
+        color: var(--text);
+      }
+      .topbar {
+        height: 60px;
+        background: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+      }
+      .topbar-title {
+        margin: 0;
+        font-size: clamp(20px, 2.2vw, 34px);
+        line-height: 1;
+      }
+      .topbar-user {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        background: #111827;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+      }
+      .btn {
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        background: #fff;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .btn.primary {
+        border-color: #2563eb;
+        background: #2563eb;
+        color: #fff;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 0 14px 20px;
+      }
+      .hero {
+        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.08);
+      }
+      .page-actions {
+        margin: 12px 0;
+        display: flex;
+        gap: 8px;
+      }
+      .hero h2 {
+        margin: 0 0 6px;
+        font-size: 24px;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .tabs {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+      }
+      .tab {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 999px;
+        padding: 7px 14px;
+        cursor: pointer;
+      }
+      .tab.active {
+        border-color: #2563eb;
+        color: #1d4ed8;
+        background: #eff6ff;
+      }
+      .panel {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 14px;
+        padding: 16px;
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+      .row {
+        margin-bottom: 12px;
+      }
+      .row label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+      .row input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        height: 40px;
+        padding: 0 10px;
+      }
+      .inline {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+      .hint {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      @media (max-width: 640px) {
+        .inline { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <h1 class="topbar-title">校园失物招领与位置追踪系统</h1>
+      <div class="topbar-user" title="用户">人</div>
+    </header>
+
+    <main class="wrap">
+      <div class="page-actions">
+        <button class="btn" id="backProfileBtn" type="button">返回个人中心</button>
+        <button class="btn primary" id="backHomeBtn" type="button">返回主页</button>
+      </div>
+      <section class="hero">
+        <h2>账号安全中心</h2>
+        <p>绑定手机与修改密码已合并到同一页，统一入口，操作更直观。</p>
+        <div class="tabs">
+          <button id="tabBind" class="tab active" type="button">绑定手机</button>
+          <button id="tabPassword" class="tab" type="button">修改密码</button>
+        </div>
+      </section>
+
+      <section id="panelBind" class="panel active">
+        <div class="row">
+          <label for="phoneInput">手机号</label>
+          <input id="phoneInput" type="text" placeholder="请输入手机号" />
+        </div>
+        <div class="row inline">
+          <div>
+            <label for="smsInput">短信验证码</label>
+            <input id="smsInput" type="text" placeholder="请输入验证码" />
+          </div>
+          <button class="btn" type="button" style="align-self:end;height:40px;">获取验证码</button>
+        </div>
+        <button class="btn primary" type="button">确认绑定</button>
+        <div class="hint">提示：绑定成功后可用于找回密码和异常登录提醒。</div>
+      </section>
+
+      <section id="panelPassword" class="panel">
+        <div class="row">
+          <label for="oldPwd">当前密码</label>
+          <input id="oldPwd" type="password" placeholder="请输入当前密码" />
+        </div>
+        <div class="row">
+          <label for="newPwd">新密码</label>
+          <input id="newPwd" type="password" placeholder="请输入新密码（8位及以上）" />
+        </div>
+        <div class="row">
+          <label for="newPwdConfirm">确认新密码</label>
+          <input id="newPwdConfirm" type="password" placeholder="请再次输入新密码" />
+        </div>
+        <button class="btn primary" type="button">确认修改</button>
+        <div class="hint">建议：使用字母+数字+符号组合，提升账号安全等级。</div>
+      </section>
+    </main>
+
+    <script>
+      const tabBind = document.getElementById("tabBind");
+      const tabPassword = document.getElementById("tabPassword");
+      const panelBind = document.getElementById("panelBind");
+      const panelPassword = document.getElementById("panelPassword");
+      const backProfileBtn = document.getElementById("backProfileBtn");
+      const backHomeBtn = document.getElementById("backHomeBtn");
+
+      function switchTab(target) {
+        const isBind = target === "bind";
+        tabBind.classList.toggle("active", isBind);
+        tabPassword.classList.toggle("active", !isBind);
+        panelBind.classList.toggle("active", isBind);
+        panelPassword.classList.toggle("active", !isBind);
+        window.location.hash = isBind ? "bind" : "password";
+      }
+
+      tabBind.addEventListener("click", () => switchTab("bind"));
+      tabPassword.addEventListener("click", () => switchTab("password"));
+
+      backProfileBtn.addEventListener("click", () => {
+        window.location.href = "./个人中心.html";
+      });
+      backHomeBtn.addEventListener("click", () => {
+        window.location.href = "./主页（初版）.html";
+      });
+
+      const initial = (window.location.hash || "").replace("#", "");
+      switchTab(initial === "password" ? "password" : "bind");
+    </script>
+  </body>
+</html>

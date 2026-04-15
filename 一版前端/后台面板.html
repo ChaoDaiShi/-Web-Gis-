@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>后台面板</title>
+    <style>
+      :root {
+        --brand: #33ccff;
+        --bg: #f5f7fb;
+        --text: #1f2937;
+        --line: #d1d5db;
+        --muted: #6b7280;
+        --ok: #15803d;
+        --warn: #b45309;
+        --danger: #dc2626;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      .topbar {
+        width: 100%;
+        height: 60px;
+        background: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+      }
+
+      .topbar-title {
+        margin: 0;
+        font-size: clamp(20px, 2.2vw, 34px);
+        line-height: 1;
+      }
+
+      .topbar-user {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        background: #111827;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .toolbar select,
+      .toolbar input,
+      .toolbar button {
+        height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 14px;
+      }
+
+      .toolbar button {
+        cursor: pointer;
+        background: white;
+      }
+
+      .table-wrap {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: auto;
+        background: #fff;
+      }
+
+      table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        background: #eef9ff;
+        z-index: 1;
+      }
+
+      tr.clickable-row {
+        cursor: pointer;
+      }
+
+      tr.clickable-row:hover {
+        background: #f9fafb;
+      }
+
+      tr.add-row {
+        background: #f8fffa;
+        cursor: pointer;
+      }
+
+      tr.add-row td {
+        color: var(--ok);
+      }
+
+      .ops button {
+        height: 30px;
+        margin-right: 6px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .ops .delete-btn {
+        color: var(--danger);
+        border-color: #fecaca;
+      }
+
+      .status {
+        margin: 10px 2px 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .status.warn {
+        color: var(--warn);
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      @media (max-width: 900px) {
+        .toolbar {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <h1 class="topbar-title">校园失物招领与位置追踪系统</h1>
+      <div class="topbar-user" title="管理员">管</div>
+    </header>
+
+    <main class="container">
+      <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="检索：输入关键词（支持所有字段）" />
+        <select id="tableSelect"></select>
+        <button id="resetSearchBtn" type="button">清空检索</button>
+        <button id="addBlankBtn" type="button">追加空白新增行</button>
+                    </div>
+
+      <div class="table-wrap">
+        <table id="adminTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+                  </div>
+
+      <p id="status" class="status">已加载后台表格。</p>
+    </main>
+
+    <script>
+      const db = {
+        lostItems: {
+          label: "失物信息表",
+          columns: ["物品ID", "物品标题", "详细描述", "类型", "当前状态", "发布者ID"],
+          rows: [
+            { "物品ID": "L001", "物品标题": "黑色书包", "详细描述": "教学楼A302拾到", "类型": "包类", "当前状态": "待认领", "发布者ID": "U1001" },
+            { "物品ID": "L002", "物品标题": "校园卡", "详细描述": "食堂二楼窗口附近", "类型": "证件", "当前状态": "待认领", "发布者ID": "U1020" },
+            { "物品ID": "L003", "物品标题": "蓝牙耳机", "详细描述": "图书馆3层", "类型": "电子产品", "当前状态": "已认领", "发布者ID": "U1088" }
+          ]
+        },
+        claimRecords: {
+          label: "认领记录表",
+          columns: ["记录ID", "物品ID", "认领人ID", "认领时间", "审核状态"],
+          rows: [
+            { "记录ID": "C001", "物品ID": "L003", "认领人ID": "U1099", "认领时间": "2026-04-01 14:20", "审核状态": "通过" },
+            { "记录ID": "C002", "物品ID": "L001", "认领人ID": "U1121", "认领时间": "2026-04-03 09:11", "审核状态": "待审核" }
+          ]
+        },
+        users: {
+          label: "用户表",
+          columns: ["用户ID", "用户名", "手机号", "角色", "状态"],
+          rows: [
+            { "用户ID": "U1001", "用户名": "张三", "手机号": "13800001111", "角色": "学生", "状态": "正常" },
+            { "用户ID": "U1020", "用户名": "李四", "手机号": "13900002222", "角色": "教师", "状态": "正常" },
+            { "用户ID": "U1099", "用户名": "王五", "手机号": "13700003333", "角色": "学生", "状态": "冻结" }
+          ]
+        }
+      };
+
+      const tableSelect = document.getElementById("tableSelect");
+      const searchInput = document.getElementById("searchInput");
+      const resetSearchBtn = document.getElementById("resetSearchBtn");
+      const addBlankBtn = document.getElementById("addBlankBtn");
+      const tableHead = document.getElementById("tableHead");
+      const tableBody = document.getElementById("tableBody");
+      const statusEl = document.getElementById("status");
+
+      let currentTable = "lostItems";
+      let showBlankAddRow = true;
+
+      function setStatus(msg, type = "") {
+        statusEl.textContent = msg;
+        statusEl.className = "status" + (type ? " " + type : "");
+      }
+
+      function initTableSelect() {
+        Object.entries(db).forEach(([key, table]) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = table.label;
+          tableSelect.appendChild(option);
+        });
+        tableSelect.value = currentTable;
+      }
+
+      function renderTable() {
+        const table = db[currentTable];
+        const keyword = searchInput.value.trim().toLowerCase();
+
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+
+        const headerRow = document.createElement("tr");
+        table.columns.forEach((col) => {
+          const th = document.createElement("th");
+          th.textContent = col;
+          headerRow.appendChild(th);
+        });
+        const thOps = document.createElement("th");
+        thOps.textContent = "操作";
+        headerRow.appendChild(thOps);
+        tableHead.appendChild(headerRow);
+
+        const filteredRows = table.rows.filter((row) => {
+          if (!keyword) return true;
+          return table.columns.some((col) => String(row[col] || "").toLowerCase().includes(keyword));
+        });
+
+        filteredRows.forEach((row, indexInFiltered) => {
+          const rowIndex = table.rows.indexOf(row);
+          const tr = document.createElement("tr");
+          tr.className = "clickable-row";
+          tr.title = "点击此行可编辑";
+          tr.addEventListener("click", () => editRow(rowIndex));
+
+          table.columns.forEach((col) => {
+            const td = document.createElement("td");
+            td.textContent = row[col] ?? "";
+            tr.appendChild(td);
+          });
+
+          const opsTd = document.createElement("td");
+          opsTd.className = "ops";
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "编辑";
+          editBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            editRow(rowIndex);
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-btn";
+          deleteBtn.textContent = "删除";
+          deleteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deleteRow(rowIndex);
+          });
+
+          opsTd.appendChild(editBtn);
+          opsTd.appendChild(deleteBtn);
+          tr.appendChild(opsTd);
+          tableBody.appendChild(tr);
+        });
+
+        if (showBlankAddRow) {
+          const addTr = document.createElement("tr");
+          addTr.className = "add-row";
+          addTr.title = "点击空白行新增数据";
+          addTr.addEventListener("click", addByBlankRow);
+
+          table.columns.forEach((_, i) => {
+            const td = document.createElement("td");
+            td.textContent = i === 0 ? "＋ 点击新增一条数据" : "";
+            addTr.appendChild(td);
+          });
+          const opsTd = document.createElement("td");
+          opsTd.textContent = "新增";
+          addTr.appendChild(opsTd);
+          tableBody.appendChild(addTr);
+        }
+
+        setStatus(`当前表：${table.label}；共 ${filteredRows.length} 条（检索后）。`, "ok");
+      }
+
+      function askRowData(columns, initial = {}) {
+        const next = {};
+        for (const col of columns) {
+          const val = window.prompt(`请输入 ${col}`, initial[col] ?? "");
+          if (val === null) return null;
+          next[col] = val.trim();
+        }
+        return next;
+      }
+
+      function editRow(index) {
+        const table = db[currentTable];
+        const oldRow = table.rows[index];
+        if (!oldRow) {
+          setStatus("未找到对应记录，可能已被删除。", "warn");
+          return;
+        }
+        const newRow = askRowData(table.columns, oldRow);
+        if (!newRow) {
+          setStatus("已取消编辑。");
+          return;
+        }
+        table.rows[index] = newRow;
+        renderTable();
+        setStatus("修改成功。", "ok");
+      }
+
+      function deleteRow(index) {
+        const table = db[currentTable];
+        const oldRow = table.rows[index];
+        if (!oldRow) return;
+        if (!window.confirm(`确认删除该条记录吗？\n${JSON.stringify(oldRow, null, 2)}`)) {
+          setStatus("已取消删除。");
+          return;
+        }
+        table.rows.splice(index, 1);
+        renderTable();
+        setStatus("删除成功。", "ok");
+      }
+
+      function addByBlankRow() {
+        const table = db[currentTable];
+        const newRow = askRowData(table.columns);
+        if (!newRow) {
+          setStatus("已取消新增。");
+          return;
+        }
+        table.rows.push(newRow);
+        renderTable();
+        setStatus("新增成功。", "ok");
+      }
+
+      tableSelect.addEventListener("change", () => {
+        currentTable = tableSelect.value;
+        renderTable();
+      });
+
+      searchInput.addEventListener("input", renderTable);
+
+      resetSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderTable();
+      });
+
+      addBlankBtn.addEventListener("click", () => {
+        showBlankAddRow = !showBlankAddRow;
+        renderTable();
+        setStatus(showBlankAddRow ? "已显示空白新增行。" : "已隐藏空白新增行。");
+      });
+
+      initTableSelect();
+      renderTable();
+              </script>
+  </body>
+</html>

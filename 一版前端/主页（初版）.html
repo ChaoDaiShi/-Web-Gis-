@@ -1,0 +1,552 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>主页（初版）</title>
+    <style>
+      :root {
+        --topbar-height: 60px;
+        --list-width: 250px;
+        --bg: #f3f4f6;
+        --yellow: #d1d100;
+        --brand: #33ccff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: #1f2937;
+        overflow: hidden;
+      }
+
+      .topbar {
+        height: var(--topbar-height);
+        background: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+      }
+      .topbar-title {
+        margin: 0;
+        font-size: clamp(20px, 2.2vw, 34px);
+        line-height: 1;
+      }
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .search-wrap input {
+        width: 220px;
+        height: 34px;
+        border: 1px solid #9ca3af;
+        border-radius: 6px;
+        padding: 0 10px;
+        background: #fff;
+      }
+      .avatar-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        border: 0;
+        background: #111827;
+        color: #fff;
+        cursor: pointer;
+        font-size: 18px;
+        display: grid;
+        place-items: center;
+      }
+
+      .app {
+        position: relative;
+        display: flex;
+        width: 100vw;
+        height: calc(100vh - var(--topbar-height));
+      }
+
+      .list-panel {
+        width: var(--list-width);
+        background: var(--yellow);
+        border-right: 1px solid #9ca3af;
+        overflow: auto;
+        transition: width 0.25s ease;
+      }
+      .list-panel.expanded {
+        width: 50vw;
+      }
+      .list-header {
+        position: sticky;
+        top: 0;
+        background: #b5b500;
+        color: #111827;
+        padding: 10px 12px;
+        font-weight: 700;
+      }
+      .list-tip {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-top: 4px;
+        font-weight: 400;
+      }
+      .item-list {
+        list-style: none;
+        margin: 0;
+        padding: 8px;
+      }
+      .item-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        padding: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .item-card:hover { background: #fff; }
+      .item-card-title { font-weight: 700; margin-bottom: 4px; }
+      .item-card-detail {
+        display: none;
+        font-size: 13px;
+        color: #374151;
+        line-height: 1.5;
+      }
+      .item-card.expanded .item-card-detail { display: block; }
+
+      .map-panel {
+        position: relative;
+        flex: 1;
+        background: #ffffff;
+        overflow: hidden;
+      }
+      .map-inner {
+        position: absolute;
+        width: 2400px;
+        height: 1600px;
+        left: 0;
+        top: 0;
+        transform: translate(0px, 0px);
+        background:
+          linear-gradient(0deg, rgba(0,0,0,0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px),
+          #fff;
+        background-size: 40px 40px, 40px 40px, auto;
+      }
+      .map-click-layer {
+        position: absolute;
+        inset: 0;
+        cursor: crosshair;
+      }
+      .marker {
+        position: absolute;
+        width: 30px;
+        height: 40px;
+        transform: translate(-50%, -100%);
+        cursor: pointer;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+      }
+      .marker::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: #12a6d8;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+      }
+      .marker.highlight::before {
+        background: #ef4444;
+        animation: pulse 0.9s infinite alternate;
+      }
+      @keyframes pulse {
+        from { transform: rotate(-45deg) scale(1); }
+        to { transform: rotate(-45deg) scale(1.12); }
+      }
+
+      .side-toggle {
+        position: absolute;
+        left: calc(var(--list-width) - 14px);
+        top: 50%;
+        transform: translateY(-50%);
+        width: 28px;
+        height: 52px;
+        border: 0;
+        border-radius: 6px;
+        background: #111827;
+        color: #fff;
+        cursor: pointer;
+        z-index: 6;
+      }
+      .side-toggle.right-mode {
+        left: 10px;
+      }
+      .side-toggle.hidden { display: none; }
+
+      .modal-mask {
+        position: fixed;
+        inset: 0;
+        display: none;
+        background: rgba(0, 0, 0, 0.35);
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .modal {
+        width: min(540px, 92vw);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+        padding: 16px;
+      }
+      .modal h3 { margin: 0 0 12px; }
+      .form-row { margin-bottom: 10px; }
+      .form-row label { display: block; margin-bottom: 4px; font-size: 14px; }
+      .form-row input,
+      .form-row textarea {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px;
+        font-size: 14px;
+      }
+      .form-row textarea { min-height: 84px; resize: vertical; }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .btn {
+        border: 1px solid #9ca3af;
+        border-radius: 8px;
+        padding: 8px 14px;
+        background: #fff;
+        cursor: pointer;
+      }
+      .btn.primary {
+        background: #2563eb;
+        color: #fff;
+        border-color: #2563eb;
+      }
+      .status {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        background: rgba(17, 24, 39, 0.8);
+        color: #fff;
+        font-size: 12px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        z-index: 5;
+      }
+
+      .fullmap .list-panel { display: none; }
+      .fullmap .map-panel { width: 100%; }
+      .split .list-panel { width: 50vw; }
+
+      @media (max-width: 900px) {
+        :root { --list-width: 220px; }
+        .search-wrap input { width: 160px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <h1 class="topbar-title">校园失物招领与位置追踪系统</h1>
+      <div class="topbar-actions">
+        <div class="search-wrap">
+          <input id="searchInput" type="text" placeholder="搜索标题/描述并定位" />
+        </div>
+        <button id="avatarBtn" class="avatar-btn" title="前往个人主页">管</button>
+      </div>
+    </header>
+
+    <main id="app" class="app">
+      <aside id="listPanel" class="list-panel" title="双击展开/收起详情">
+        <div class="list-header">
+          标记列表
+          <div class="list-tip">双击黄色区域展开详细列表（50/50）</div>
+        </div>
+        <ul id="itemList" class="item-list"></ul>
+      </aside>
+
+      <button id="leftArrow" class="side-toggle" title="切入全图模式">◀</button>
+      <button id="rightArrow" class="side-toggle right-mode hidden" title="返回分栏模式">▶</button>
+
+      <section id="mapPanel" class="map-panel">
+        <div id="mapInner" class="map-inner"></div>
+        <div id="mapClickLayer" class="map-click-layer"></div>
+        <div id="status" class="status">点击地图任意位置可发布标记</div>
+      </section>
+    </main>
+
+    <div id="publishMask" class="modal-mask">
+      <div class="modal">
+        <h3>发布信息</h3>
+        <div class="form-row">
+          <label for="pubTitle">标题</label>
+          <input id="pubTitle" type="text" placeholder="请输入标题" />
+        </div>
+        <div class="form-row">
+          <label for="pubDetail">描述</label>
+          <textarea id="pubDetail" placeholder="请输入详细描述"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="pubPhone">联系方式</label>
+          <input id="pubPhone" type="text" placeholder="请输入联系方式" />
+        </div>
+        <div class="modal-actions">
+          <button id="pubCancel" class="btn" type="button">取消</button>
+          <button id="pubSubmit" class="btn primary" type="button">发布</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="detailMask" class="modal-mask">
+      <div class="modal">
+        <h3 id="detailTitle">详情</h3>
+        <div id="detailBody" style="line-height:1.7;font-size:14px;"></div>
+        <div class="modal-actions">
+          <button id="detailClose" class="btn primary" type="button">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const avatarBtn = document.getElementById("avatarBtn");
+      const app = document.getElementById("app");
+      const listPanel = document.getElementById("listPanel");
+      const itemList = document.getElementById("itemList");
+      const mapPanel = document.getElementById("mapPanel");
+      const mapInner = document.getElementById("mapInner");
+      const mapClickLayer = document.getElementById("mapClickLayer");
+      const leftArrow = document.getElementById("leftArrow");
+      const rightArrow = document.getElementById("rightArrow");
+      const statusEl = document.getElementById("status");
+      const searchInput = document.getElementById("searchInput");
+
+      const publishMask = document.getElementById("publishMask");
+      const pubTitle = document.getElementById("pubTitle");
+      const pubDetail = document.getElementById("pubDetail");
+      const pubPhone = document.getElementById("pubPhone");
+      const pubCancel = document.getElementById("pubCancel");
+      const pubSubmit = document.getElementById("pubSubmit");
+
+      const detailMask = document.getElementById("detailMask");
+      const detailTitle = document.getElementById("detailTitle");
+      const detailBody = document.getElementById("detailBody");
+      const detailClose = document.getElementById("detailClose");
+
+      let mode = "normal"; // normal | full | split
+      let markers = [
+        { id: "M001", x: 640, y: 560, title: "黑色水杯", detail: "图书馆二层自习区拾取", phone: "13800001234", time: "2026-04-15 09:00" },
+        { id: "M002", x: 1120, y: 780, title: "校园卡", detail: "第一食堂门口发现", phone: "13900005678", time: "2026-04-15 11:20" },
+        { id: "M003", x: 1260, y: 640, title: "蓝牙耳机", detail: "教学楼A座303座位旁", phone: "13600007890", time: "2026-04-15 13:08" }
+      ];
+      let pendingWorldPoint = null;
+      let mapOffset = { x: -300, y: -180 };
+      let highlightId = "";
+
+      function updateLeftArrowPosition() {
+        const appRect = app.getBoundingClientRect();
+        const listRect = listPanel.getBoundingClientRect();
+        const relativeLeft = listRect.right - appRect.left - 14;
+        leftArrow.style.left = `${Math.max(6, relativeLeft)}px`;
+      }
+
+      function setStatus(msg) { statusEl.textContent = msg; }
+
+      function applyMapTransform() {
+        mapInner.style.transform = `translate(${mapOffset.x}px, ${mapOffset.y}px)`;
+      }
+
+      function centerToWorldPoint(x, y) {
+        const rect = mapPanel.getBoundingClientRect();
+        mapOffset.x = rect.width / 2 - x;
+        mapOffset.y = rect.height / 2 - y;
+        applyMapTransform();
+      }
+
+      function switchMode(nextMode) {
+        mode = nextMode;
+        app.classList.remove("fullmap", "split");
+        if (nextMode === "full") app.classList.add("fullmap");
+        if (nextMode === "split") app.classList.add("split");
+
+        if (nextMode === "full") {
+          leftArrow.classList.add("hidden");
+          rightArrow.classList.remove("hidden");
+        } else {
+          leftArrow.classList.remove("hidden");
+          rightArrow.classList.add("hidden");
+        }
+        updateLeftArrowPosition();
+      }
+
+      function openPublishModal(worldX, worldY) {
+        pendingWorldPoint = { x: worldX, y: worldY };
+        pubTitle.value = "";
+        pubDetail.value = "";
+        pubPhone.value = "";
+        publishMask.style.display = "flex";
+      }
+
+      function closePublishModal() {
+        publishMask.style.display = "none";
+      }
+
+      function openDetail(marker) {
+        detailTitle.textContent = marker.title;
+        detailBody.innerHTML = `
+          <div><strong>ID：</strong>${marker.id}</div>
+          <div><strong>描述：</strong>${marker.detail}</div>
+          <div><strong>联系方式：</strong>${marker.phone || "-"}</div>
+          <div><strong>发布时间：</strong>${marker.time}</div>
+        `;
+        detailMask.style.display = "flex";
+      }
+
+      function closeDetail() {
+        detailMask.style.display = "none";
+      }
+
+      function renderMarkers() {
+        mapInner.querySelectorAll(".marker").forEach((n) => n.remove());
+        markers.forEach((m) => {
+          const el = document.createElement("div");
+          el.className = "marker" + (m.id === highlightId ? " highlight" : "");
+          el.style.left = `${m.x}px`;
+          el.style.top = `${m.y}px`;
+          el.title = `${m.title}（点击查看详情）`;
+          el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            highlightId = m.id;
+            renderMarkers();
+            openDetail(m);
+          });
+          mapInner.appendChild(el);
+        });
+      }
+
+      function renderList() {
+        itemList.innerHTML = "";
+        markers.forEach((m) => {
+          const li = document.createElement("li");
+          li.className = "item-card";
+          li.innerHTML = `
+            <div class="item-card-title">${m.title}</div>
+            <div>ID: ${m.id}</div>
+            <div class="item-card-detail">
+              <div>描述：${m.detail}</div>
+              <div>联系方式：${m.phone || "-"}</div>
+              <div>发布时间：${m.time}</div>
+            </div>
+          `;
+          li.addEventListener("click", () => {
+            highlightId = m.id;
+            centerToWorldPoint(m.x, m.y);
+            renderMarkers();
+            setStatus(`已定位到：${m.title}`);
+          });
+          li.addEventListener("dblclick", (e) => {
+            e.stopPropagation();
+            li.classList.toggle("expanded");
+          });
+          itemList.appendChild(li);
+        });
+      }
+
+      function renderAll() {
+        renderMarkers();
+        renderList();
+        updateLeftArrowPosition();
+      }
+
+      avatarBtn.addEventListener("click", () => {
+        window.location.href = "./个人中心.html";
+      });
+
+      leftArrow.addEventListener("click", () => {
+        switchMode("full");
+        setStatus("已切换全图模式");
+      });
+      rightArrow.addEventListener("click", () => {
+        switchMode("normal");
+        setStatus("已返回分栏模式");
+      });
+
+      listPanel.addEventListener("dblclick", (e) => {
+        if (mode === "full") return;
+        if (e.target.closest(".item-card")) return;
+        switchMode(mode === "split" ? "normal" : "split");
+        setStatus(mode === "split" ? "列表已展开（50/50）" : "已恢复普通分栏");
+      });
+
+      mapClickLayer.addEventListener("click", (e) => {
+        const rect = mapPanel.getBoundingClientRect();
+        const worldX = e.clientX - rect.left - mapOffset.x;
+        const worldY = e.clientY - rect.top - mapOffset.y;
+        openPublishModal(worldX, worldY);
+      });
+
+      pubCancel.addEventListener("click", closePublishModal);
+      publishMask.addEventListener("click", (e) => { if (e.target === publishMask) closePublishModal(); });
+
+      pubSubmit.addEventListener("click", () => {
+        if (!pendingWorldPoint) return;
+        const title = pubTitle.value.trim();
+        const detail = pubDetail.value.trim();
+        if (!title || !detail) {
+          setStatus("标题和描述不能为空");
+          return;
+        }
+        const id = "M" + String(Date.now()).slice(-5);
+        markers.push({
+          id,
+          x: pendingWorldPoint.x,
+          y: pendingWorldPoint.y,
+          title,
+          detail,
+          phone: pubPhone.value.trim(),
+          time: new Date().toLocaleString("zh-CN", { hour12: false })
+        });
+        highlightId = id;
+        renderAll();
+        closePublishModal();
+        setStatus("发布成功，已生成新标记并写入列表");
+      });
+
+      detailClose.addEventListener("click", closeDetail);
+      detailMask.addEventListener("click", (e) => { if (e.target === detailMask) closeDetail(); });
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const key = searchInput.value.trim().toLowerCase();
+        if (!key) return;
+        const hit = markers.find((m) => `${m.title} ${m.detail}`.toLowerCase().includes(key));
+        if (!hit) {
+          setStatus("未找到匹配标记");
+          return;
+        }
+        highlightId = hit.id;
+        centerToWorldPoint(hit.x, hit.y);
+        renderMarkers();
+        setStatus(`已定位并高亮：${hit.title}`);
+      });
+
+      window.addEventListener("resize", () => {
+        updateLeftArrowPosition();
+      });
+
+      // Keep arrow glued to split line even during width transition
+      new ResizeObserver(() => {
+        updateLeftArrowPosition();
+      }).observe(listPanel);
+
+      applyMapTransform();
+      switchMode("normal");
+      renderAll();
+    </script>
+  </body>
+</html>
