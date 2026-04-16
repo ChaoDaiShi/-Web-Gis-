@@ -121,47 +121,96 @@
         background: #ffffff;
         overflow: hidden;
       }
-      .map-inner {
-        position: absolute;
-        width: 2400px;
-        height: 1600px;
-        left: 0;
-        top: 0;
-        transform: translate(0px, 0px);
-        background:
-          linear-gradient(0deg, rgba(0,0,0,0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px),
-          #fff;
-        background-size: 40px 40px, 40px 40px, auto;
-      }
-      .map-click-layer {
-        position: absolute;
-        inset: 0;
-        cursor: crosshair;
-      }
-      .marker {
-        position: absolute;
-        width: 30px;
-        height: 40px;
-        transform: translate(-50%, -100%);
-        cursor: pointer;
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-      }
-      .marker::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: #12a6d8;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-      }
-      .marker.highlight::before {
-        background: #ef4444;
-        animation: pulse 0.9s infinite alternate;
-      }
       @keyframes pulse {
         from { transform: rotate(-45deg) scale(1); }
         to { transform: rotate(-45deg) scale(1.12); }
+      }
+      @keyframes markerPulse {
+        0% {
+          transform: translate(-50%, -100%) scale(1);
+          box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35);
+        }
+        70% {
+          transform: translate(-50%, -100%) scale(1.08);
+          box-shadow: 0 0 0 16px rgba(245, 158, 11, 0);
+        }
+        100% {
+          transform: translate(-50%, -100%) scale(1);
+          box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+        }
+      }
+      @keyframes markerBounce {
+        0%, 100% { transform: translate(-50%, -100%) translateY(0); }
+        50% { transform: translate(-50%, -100%) translateY(-8px); }
+      }
+      .marker-wrap {
+        position: relative;
+        width: 34px;
+        height: 48px;
+      }
+      .marker-core {
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        width: 28px;
+        height: 28px;
+        border-radius: 50% 50% 50% 0;
+        transform: translate(-50%, -100%) rotate(-45deg);
+        background: linear-gradient(135deg, #f97316 0%, #ef4444 70%);
+        border: 2px solid #fff;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+      }
+      .marker-core::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #fff;
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+      .marker-wave {
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        transform: translate(-50%, -100%);
+        animation: markerPulse 1.8s ease-out infinite;
+      }
+      .marker-label {
+        position: absolute;
+        left: 50%;
+        top: -8px;
+        transform: translate(-50%, -100%);
+        min-width: 62px;
+        max-width: 120px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.2;
+        color: #fff;
+        background: rgba(17, 24, 39, 0.88);
+        border-radius: 999px;
+        padding: 3px 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .marker-wrap.highlight .marker-core {
+        background: linear-gradient(135deg, #facc15 0%, #f97316 58%, #dc2626 100%);
+        box-shadow: 0 10px 18px rgba(239, 68, 68, 0.42);
+        animation: markerBounce 1s ease-in-out infinite;
+      }
+      .marker-wrap.highlight .marker-wave {
+        width: 40px;
+        height: 40px;
+        animation-duration: 1.1s;
+      }
+      .marker-wrap.highlight .marker-label {
+        background: #ef4444;
       }
 
       .side-toggle {
@@ -249,7 +298,13 @@
         :root { --list-width: 220px; }
         .search-wrap input { width: 160px; }
       }
+
+      #mapContainer {
+         width: 100%;
+         height: 100%;
+      }
     </style>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=49382949a3128467653e88aab0daa5c7"></script>
   </head>
   <body>
     <header class="topbar">
@@ -275,9 +330,22 @@
       <button id="rightArrow" class="side-toggle right-mode hidden" title="返回分栏模式">▶</button>
 
       <section id="mapPanel" class="map-panel">
-        <div id="mapInner" class="map-inner"></div>
-        <div id="mapClickLayer" class="map-click-layer"></div>
+        <div id="mapContainer" style="width:100%;height:100%;"></div>
         <div id="status" class="status">点击地图任意位置可发布标记</div>
+        <button id="toggle3D" style="
+          position:absolute;
+          top:12px;
+          left:12px;
+          z-index:10;
+          padding:6px 10px;
+          border-radius:6px;
+          border:none;
+          background:#111827;
+          color:#fff;
+          cursor:pointer;
+        ">
+          切换3D
+        </button>
       </section>
     </main>
 
@@ -319,8 +387,7 @@
       const listPanel = document.getElementById("listPanel");
       const itemList = document.getElementById("itemList");
       const mapPanel = document.getElementById("mapPanel");
-      const mapInner = document.getElementById("mapInner");
-      const mapClickLayer = document.getElementById("mapClickLayer");
+
       const leftArrow = document.getElementById("leftArrow");
       const rightArrow = document.getElementById("rightArrow");
       const statusEl = document.getElementById("status");
@@ -338,15 +405,86 @@
       const detailBody = document.getElementById("detailBody");
       const detailClose = document.getElementById("detailClose");
 
+      let is3D = true;
       let mode = "normal"; // normal | full | split
       let markers = [
-        { id: "M001", x: 640, y: 560, title: "黑色水杯", detail: "图书馆二层自习区拾取", phone: "13800001234", time: "2026-04-15 09:00" },
-        { id: "M002", x: 1120, y: 780, title: "校园卡", detail: "第一食堂门口发现", phone: "13900005678", time: "2026-04-15 11:20" },
-        { id: "M003", x: 1260, y: 640, title: "蓝牙耳机", detail: "教学楼A座303座位旁", phone: "13600007890", time: "2026-04-15 13:08" }
-      ];
+          { id: "M001", lng: 103.988, lat: 30.582, title: "黑色水杯", detail: "图书馆拾取", phone: "13800001234", time: "2026-04-15 09:00" },
+          { id: "M002", lng: 103.990, lat: 30.581, title: "校园卡", detail: "食堂门口", phone: "13900005678", time: "2026-04-15 11:20" },
+          { id: "M003", lng: 103.986, lat: 30.583, title: "蓝牙耳机", detail: "教学楼A座", phone: "13600007890", time: "2026-04-15 13:08" }
+        ];
       let pendingWorldPoint = null;
       let mapOffset = { x: -300, y: -180 };
       let highlightId = "";
+      let map;
+      let markerObjs = [];
+
+      function initMap() {
+          //校园范围（你提供的）
+          const campusBounds = [
+            [103.984435, 30.578367], // 西南角
+            [103.992271, 30.58486]   // 东北角
+          ];
+
+          map = new AMap.Map("mapContainer", {
+          zoom: 18,
+          center: [103.9885, 30.5815],
+          viewMode: '3D',   // 关键：开启3D模式
+          pitch: 45,        // 倾斜角度（0-83）
+          rotation: 0       // 可选：旋转角度
+        });
+
+          //遮罩（校园外变灰）
+        //校园真实轮廓（先用近似版）
+        const campusPath = [
+          [103.984435, 30.578367],
+          [103.986200, 30.579000],
+          [103.988000, 30.579500],
+          [103.990000, 30.580500],
+          [103.992271, 30.584860],
+          [103.989500, 30.584200],
+          [103.987000, 30.583500],
+          [103.985000, 30.582000]
+        ];
+
+        //校园外遮罩
+        
+        //限制地图只能在校园内
+
+        //初始视角锁定校园
+        const bounds = new AMap.Bounds(
+          [103.984435, 30.578367],
+          [103.992271, 30.58486]
+        );
+
+        map.setBounds(bounds);
+
+        //限制缩放
+        map.setZooms([16, 20]);
+
+        //点击发布
+        map.on("click", function (e) {
+          const { lng, lat } = e.lnglat;
+          openPublishModal(lng, lat);
+        });
+        }
+
+       const toggleBtn = document.getElementById("toggle3D");
+
+      toggleBtn.addEventListener("click", () => {
+            is3D = !is3D;
+
+            if (is3D) {
+              map.setPitch(45);     // 开3D
+              map.setRotation(0);
+              toggleBtn.innerText = "切换2D";
+              setStatus("已切换3D视图");
+            } else {
+              map.setPitch(0);      // 回2D
+              map.setRotation(0);
+              toggleBtn.innerText = "切换3D";
+              setStatus("已切换2D视图");
+            }
+       });
 
       function updateLeftArrowPosition() {
         const appRect = app.getBoundingClientRect();
@@ -357,16 +495,9 @@
 
       function setStatus(msg) { statusEl.textContent = msg; }
 
-      function applyMapTransform() {
-        mapInner.style.transform = `translate(${mapOffset.x}px, ${mapOffset.y}px)`;
-      }
-
-      function centerToWorldPoint(x, y) {
-        const rect = mapPanel.getBoundingClientRect();
-        mapOffset.x = rect.width / 2 - x;
-        mapOffset.y = rect.height / 2 - y;
-        applyMapTransform();
-      }
+      function centerToPoint(lng, lat) {
+          map.setCenter([lng, lat]);
+        }
 
       function switchMode(nextMode) {
         mode = nextMode;
@@ -382,10 +513,20 @@
           rightArrow.classList.add("hidden");
         }
         updateLeftArrowPosition();
+        setTimeout(() => {
+          map && map.resize();
+        }, 300);
+
+        map.setLayers([
+          new AMap.TileLayer.Satellite(),
+          new AMap.TileLayer.RoadNet()
+        ]);
+
+        map.setZooms([17, 22]);
       }
 
-      function openPublishModal(worldX, worldY) {
-        pendingWorldPoint = { x: worldX, y: worldY };
+      function openPublishModal(lng, lat) {
+          pendingWorldPoint = { lng, lat };
         pubTitle.value = "";
         pubDetail.value = "";
         pubPhone.value = "";
@@ -412,22 +553,44 @@
       }
 
       function renderMarkers() {
-        mapInner.querySelectorAll(".marker").forEach((n) => n.remove());
-        markers.forEach((m) => {
-          const el = document.createElement("div");
-          el.className = "marker" + (m.id === highlightId ? " highlight" : "");
-          el.style.left = `${m.x}px`;
-          el.style.top = `${m.y}px`;
-          el.title = `${m.title}（点击查看详情）`;
-          el.addEventListener("click", (e) => {
-            e.stopPropagation();
-            highlightId = m.id;
-            renderMarkers();
-            openDetail(m);
+          // 清空旧 marker
+          markerObjs.forEach(m => m.setMap(null));
+          markerObjs = [];
+
+          markers.forEach((m) => {
+
+            // 防止 NaN 直接跳过
+            if (
+              m.lng === undefined || m.lat === undefined ||
+              isNaN(m.lng) || isNaN(m.lat)
+            ) {
+              console.warn("无效坐标:", m);
+              return;
+            }
+
+            const isHighlight = highlightId && highlightId === m.id;
+            const marker = new AMap.Marker({
+              position: [Number(m.lng), Number(m.lat)],
+              map: map,
+              title: m.title,
+              offset: new AMap.Pixel(-17, -48),
+              content: `
+                <div class="marker-wrap ${isHighlight ? "highlight" : ""}">
+                  <div class="marker-wave"></div>
+                  <div class="marker-core"></div>
+                  <div class="marker-label">${m.title}</div>
+                </div>
+              `
+            });
+
+            marker.on("click", () => {
+              highlightId = m.id;
+              openDetail(m);
+            });
+
+            markerObjs.push(marker);
           });
-          mapInner.appendChild(el);
-        });
-      }
+        }
 
       function renderList() {
         itemList.innerHTML = "";
@@ -445,7 +608,7 @@
           `;
           li.addEventListener("click", () => {
             highlightId = m.id;
-            centerToWorldPoint(m.x, m.y);
+            centerToPoint(m.lng, m.lat);
             renderMarkers();
             setStatus(`已定位到：${m.title}`);
           });
@@ -483,12 +646,6 @@
         setStatus(mode === "split" ? "列表已展开（50/50）" : "已恢复普通分栏");
       });
 
-      mapClickLayer.addEventListener("click", (e) => {
-        const rect = mapPanel.getBoundingClientRect();
-        const worldX = e.clientX - rect.left - mapOffset.x;
-        const worldY = e.clientY - rect.top - mapOffset.y;
-        openPublishModal(worldX, worldY);
-      });
 
       pubCancel.addEventListener("click", closePublishModal);
       publishMask.addEventListener("click", (e) => { if (e.target === publishMask) closePublishModal(); });
@@ -504,8 +661,8 @@
         const id = "M" + String(Date.now()).slice(-5);
         markers.push({
           id,
-          x: pendingWorldPoint.x,
-          y: pendingWorldPoint.y,
+          lng: pendingWorldPoint.lng,
+          lat: pendingWorldPoint.lat,
           title,
           detail,
           phone: pubPhone.value.trim(),
@@ -530,7 +687,7 @@
           return;
         }
         highlightId = hit.id;
-        centerToWorldPoint(hit.x, hit.y);
+        centerToPoint(hit.lng, hit.lat);
         renderMarkers();
         setStatus(`已定位并高亮：${hit.title}`);
       });
@@ -544,7 +701,7 @@
         updateLeftArrowPosition();
       }).observe(listPanel);
 
-      applyMapTransform();
+      initMap();
       switchMode("normal");
       renderAll();
     </script>
