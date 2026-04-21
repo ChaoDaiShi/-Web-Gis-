@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>主页（初版）</title>
+  <link rel="stylesheet" href="./样式/主页.css">
+  <script src="https://webapi.amap.com/maps?v=2.0&key=49382949a3128467653e88aab0daa5c7"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <h1 class="topbar-title">校园失物招领与位置追踪系统</h1>
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <input id="searchInput" type="text" placeholder="搜索标题/描述并定位" />
+      </div>
+      <button id="avatarBtn" class="avatar-btn" title="前往个人主页">管</button>
+    </div>
+  </header>
+
+  <main id="app" class="app">
+    <aside id="listPanel" class="list-panel" title="双击展开/收起详情">
+      <div class="list-header">
+        标记列表
+        <div class="list-tip">双击黄色区域展开详细列表（50/50）</div>
+      </div>
+      <ul id="itemList" class="item-list"></ul>
+    </aside>
+
+    <button id="leftArrow" class="side-toggle" title="切入全图模式">◀</button>
+    <button id="rightArrow" class="side-toggle right-mode hidden" title="返回分栏模式">▶</button>
+
+    <section id="mapPanel" class="map-panel">
+      <div id="mapContainer" style="width:100%;height:100%;"></div>
+      <div id="status" class="status">点击地图任意位置可发布标记</div>
+      <button id="toggle3D" style="
+                position:absolute;
+                top:12px;
+                left:12px;
+                z-index:10;
+                padding:6px 10px;
+                border-radius:6px;
+                border:none;
+                background:#111827;
+                color:#fff;
+                cursor:pointer;
+            ">
+        切换3D
+      </button>
+    </section>
+  </main>
+
+  <div id="publishMask" class="modal-mask">
+    <div class="modal">
+      <h3>发布信息</h3>
+      <div class="form-row">
+        <label for="pubTitle">标题</label>
+        <input id="pubTitle" type="text" placeholder="请输入标题" />
+      </div>
+      <div class="form-row">
+        <label for="pubDetail">描述</label>
+        <textarea id="pubDetail" placeholder="请输入详细描述"></textarea>
+      </div>
+      <div class="form-row">
+        <label for="pubPhone">联系方式</label>
+        <input id="pubPhone" type="text" placeholder="请输入联系方式" />
+      </div>
+      <div class="modal-actions">
+        <button id="pubCancel" class="btn" type="button">取消</button>
+        <button id="pubSubmit" class="btn primary" type="button">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="detailMask" class="modal-mask">
+    <div class="modal">
+      <h3 id="detailTitle">详情</h3>
+      <div id="detailBody" style="line-height:1.7;font-size:14px;"></div>
+      <div class="modal-actions">
+        <button id="detailClose" class="btn primary" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./脚本/主页.js"></script>
+</body>
+
+</html>

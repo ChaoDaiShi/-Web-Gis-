@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>个人中心</title>
+    <link rel="stylesheet" href="./样式/个人中心.css">
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-title">校园失物招领与位置追踪系统</div>
+        <div class="topbar-user">管</div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="avatar-container">
+                <div class="avatar">👤</div>
+                <div>
+                    <div class="username">用户名</div>
+                    <div class="user-id">用户ID</div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn active" data-panel="profile">个人资料</button>
+                <button class="nav-btn" data-panel="publish">失物发布记录</button>
+                <button class="nav-btn" data-panel="claim">失物认领记录</button>
+                <button class="nav-btn" data-action="bind">账号安全（手机）</button>
+                <button class="nav-btn" data-action="password">账号安全（密码）</button>
+                <button class="nav-btn" data-action="home">返回主页</button>
+            </div>
+
+            <div class="sidebar-footer">
+                <a data-action="logout">退出登录</a>
+                <a href="./关于我们.html">关于我们</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-panel">
+                <div id="profile-panel" class="panel">
+                    <div class="panel-header">
+                        <div class="panel-tab active">基本信息</div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">邮箱：</span>
+                            <span class="info-value">user@example.com</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">手机号：</span>
+                            <span class="info-value">138****8888</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">注册时间：</span>
+                            <span class="info-value">2024-01-01</span>
+                        </div>
+                    </div>
+
+                    <div class="description-area">
+                        <label>个人简介：</label>
+                        <textarea placeholder="暂无个人简介" readonly></textarea>
+                    </div>
+                </div>
+
+                <div id="publish-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <div class="panel-tab active">全部记录</div>
+                        <div class="panel-tab">我的收藏</div>
+                        <div class="panel-tab">已归档</div>
+                        <div class="panel-tab">分类管理</div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>物品名称</th>
+                                <th>发布时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div id="claim-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <div class="panel-tab active">全部记录</div>
+                        <div class="panel-tab">我的收藏</div>
+                        <div class="panel-tab">已归档</div>
+                        <div class="panel-tab">分类管理</div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>物品名称</th>
+                                <th>认领时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./脚本/个人中心.js"></script>
+</body>
+</html>
