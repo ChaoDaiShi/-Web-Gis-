@@ -3,14 +3,17 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import session
 
 # ================== 配置 ==================
 class Config:
     SECRET_KEY = 'your-secret-key-here'
 
-    # 👉 你的数据库（已存在）
+    #  你的数据库（已存在）
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://mapuser:123456@localhost/compus'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    AMAP_WEB_KEY = '49382949a3128467653e88aab0daa5c7'
+    AMAP_SECURITY_JS_CODE = '13aaa6de30599d02d3b3f1c562e9bd5e'
 
 
 # ================== 初始化 ==================
@@ -19,9 +22,9 @@ db = SQLAlchemy()
 
 # ================== 模型 ==================
 class User(db.Model):
-    __tablename__ = 'user'   # ✅ 对应数据库表
+    __tablename__ = 'user'   # 对应数据库表
 
-    user_id = db.Column(db.Integer, primary_key=True)   # ✅ 对应 user_id
+    user_id = db.Column(db.Integer, primary_key=True)   # 对应 user_id
     username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), unique=True)
@@ -88,6 +91,12 @@ def login():
     email = data.get('email')
     password = data.get('password')
 
+    # 去空格
+    if email:
+        email = email.strip()
+    if password:
+        password = password.strip()
+
     if not email or not password:
         return jsonify({'message': 'Missing required fields'}), 400
 
@@ -96,13 +105,21 @@ def login():
     if not user:
         return jsonify({'message': 'Invalid email or password'}), 401
 
-    if not check_password_hash(user.password_hash, password):
-        return jsonify({'message': 'Invalid email or password'}), 401
+    try:
+        # 安全验证
+        if not check_password_hash(user.password_hash, password):
+            return jsonify({'message': 'Invalid email or password'}), 401
+    except Exception as e:
+        # 防止历史脏数据（明文密码）
+        if user.password_hash != password:
+            return jsonify({'message': 'Invalid email or password'}), 401
+        
+    session['user'] = user.user_id
 
     return jsonify({
         'message': 'Login successful',
         'user': {
-            'user_id': user.user_id,   # ✅ 修正
+            'user_id': user.user_id,
             'username': user.username,
             'email': user.email
         }

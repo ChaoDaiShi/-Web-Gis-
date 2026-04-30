@@ -1,80 +1,128 @@
-from flask import Blueprint, jsonify, send_from_directory
+from flask import Blueprint, jsonify, request
 import pymysql
-import os
+from datetime import datetime
 
-# 创建地图服务蓝图
 map_bp = Blueprint('map', __name__)
 
-# ====== 数据库配置 ======
+# ================== 数据库配置 ==================
 DB_CONFIG = {
     "host": "localhost",
-    "user": "mapuser",        # ← 你刚创建的用户
-    "password": "123456",     # ← 你刚设置的密码
+    "user": "mapuser",
+    "password": "123456",
     "database": "compus",
     "charset": "utf8mb4"
 }
+
 
 def get_conn():
     return pymysql.connect(**DB_CONFIG)
 
 
-
-# ====== 1. 获取默认地图 ======
+# ================== 0. 地图默认配置 ==================
 @map_bp.route('/map/default', methods=['GET'])
 def get_default_map():
     conn = get_conn()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        cursor.execute("""
+            SELECT
+                name, center_lng, center_lat,
+                sw_lng, sw_lat, ne_lng, ne_lat, zoom
+            FROM map_config
+            ORDER BY name ASC
+            LIMIT 1
+        """)
+        row = cursor.fetchone()
+        if row:
+            return jsonify(row)
+    except Exception:
+        pass
+    finally:
+        cursor.close()
+        conn.close()
 
-    sql = "SELECT * FROM map_config ORDER BY id ASC LIMIT 1"
-    cursor.execute(sql)
-    data = cursor.fetchone()
+    return jsonify({
+        "name": "default",
+        "center_lng": 121.4737,
+        "center_lat": 31.2304,
+        "sw_lng": 121.4637,
+        "sw_lat": 31.2204,
+        "ne_lng": 121.4837,
+        "ne_lat": 31.2404,
+        "zoom": 18
+    })
 
-    cursor.close()
-    conn.close()
 
-    if not data:
-        return jsonify({"error": "没有地图数据"}), 404
-
-    return jsonify(data)
-
-
-# ====== 2. 获取地图列表（用于下拉选择） ======
-@map_bp.route('/map/list', methods=['GET'])
-def get_map_list():
+# ================== 1. 获取地图标记（location表） ==================
+@map_bp.route('/map/markers', methods=['GET'])
+def get_markers():
     conn = get_conn()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-    sql = "SELECT id, name FROM map_config"
-    cursor.execute(sql)
-    data = cursor.fetchall()
+    try:
+        cursor.execute("""
+            SELECT
+                location_id,
+                name,
+                longitude AS lng,
+                latitude AS lat
+            FROM location
+            ORDER BY location_id DESC
+        """)
+        data = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
+        for row in data:
+            row["title"] = row.get("name") or "未命名标记"
+            row["description"] = ""
+            row["status"] = 0
+            row["create_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    return jsonify(data)
+        return jsonify({
+            "success": True,
+            "data": data
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
-# ====== 3. 根据ID获取地图配置 ======
-@map_bp.route('/map/<int:map_id>', methods=['GET'])
-def get_map_by_id(map_id):
+# ================== 2. 发布标记（写入location表） ==================
+@map_bp.route('/map/publish', methods=['POST'])
+def publish_marker():
+    data = request.get_json() or {}
+
+    title = data.get("title", "").strip()
+    lat = data.get("lat")
+    lng = data.get("lng")
+
+    if not all([title, lat, lng]):
+        return jsonify({"success": False, "message": "参数缺失"}), 400
+
     conn = get_conn()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor()
 
-    sql = "SELECT * FROM map_config WHERE id=%s"
-    cursor.execute(sql, (map_id,))
-    data = cursor.fetchone()
+    try:
+        cursor.execute("""
+            INSERT INTO location (name, longitude, latitude)
+            VALUES (%s, %s, %s)
+        """, (title, lng, lat))
 
-    cursor.close()
-    conn.close()
+        conn.commit()
 
-    if not data:
-        return jsonify({"error": "地图不存在"}), 404
+        return jsonify({
+            "success": True,
+            "message": "发布成功"
+        })
 
-    return jsonify(data)
+    except Exception as e:
+        conn.rollback()
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
-
-# ====== 4. 健康检查接口（可选） ======
-@map_bp.route("/")
-def home():
-    base_dir = r"F:\工程实践2\校园失物招领与位置追踪系统\前端"
-    return send_from_directory(base_dir, "主页.html")
+    finally:
+        cursor.close()
+        conn.close()
