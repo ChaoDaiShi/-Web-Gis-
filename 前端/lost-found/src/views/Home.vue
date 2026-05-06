@@ -1,5 +1,12 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import AppTopBar from "../components/AppTopBar.vue";
+import SearchResultModal from "../components/SearchResultModal.vue";
+import MarkerDetailModal from "../components/MarkerDetailModal.vue";
+import PublishModal from "../components/PublishModal.vue";
+
+const router = useRouter();
 
 const API_BASE = "http://127.0.0.1:5000/api";
 const mapContainerId = "mapContainer";
@@ -9,6 +16,9 @@ const searchInput = ref("");
 const is3D = ref(true);
 const mode = ref("normal");
 const listExpanded = ref(false);
+const filterStatus = ref("all");
+const isDoubleClick = ref(false);
+let clickTimer = null;
 
 const markers = ref([]);
 const markerObjs = ref([]);
@@ -18,11 +28,50 @@ const pendingWorldPoint = ref(null);
 const mapRef = ref(null);
 
 const showPublishModal = ref(false);
-const pubTitle = ref("");
-const pubDetail = ref("");
-const pubPhone = ref("");
+const categories = ref([]);
 
 const showDetailModal = ref(false);
+const showSearchModal = ref(false);
+const searchResults = ref([]);
+const avatarUrl = ref("");
+const username = ref("");
+
+async function loadUserInfo() {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return;
+
+  try {
+    const res = await fetch(`http://127.0.0.1:5000/api/profile?user_id=${userId}`);
+    const data = await res.json();
+    if (data.success && data.data) {
+      if (data.data.avatar) {
+        avatarUrl.value = `http://127.0.0.1:5000${data.data.avatar}`;
+      }
+      username.value = data.data.username || "";
+    }
+  } catch (e) {
+    console.error("加载用户信息失败:", e);
+  }
+}
+
+async function loadCategories() {
+  try {
+    const res = await fetch(`${API_BASE}/admin/categories`);
+    const data = await res.json();
+    if (data && Array.isArray(data)) {
+      categories.value = data;
+      if (categories.value.length > 0) {
+        pubCategory.value = categories.value[0].category_id;
+      }
+    }
+  } catch (e) {
+    console.error("加载分类失败:", e);
+  }
+}
+
+function getInitial() {
+  return username.value ? username.value.charAt(0).toUpperCase() : "用";
+}
 
 const appClass = computed(() => {
   if (mode.value === "fullmap") return "app fullmap";
@@ -31,16 +80,28 @@ const appClass = computed(() => {
 });
 
 const leftArrowStyle = computed(() => ({
-  left: listExpanded.value ? "calc(50vw - 32px)" : "calc(var(--list-width) - 32px)",
+  left: listExpanded.value ? "50vw" : "var(--list-width)",
 }));
+
+const filteredMarkers = computed(() => {
+  if (filterStatus.value === "all") return markers.value;
+  const statusValue = filterStatus.value === "lost" ? 0 : 1;
+  return markers.value.filter(m => m.status === statusValue);
+});
+
+const isMapClickAdd = computed(() => pendingWorldPoint.value !== null);
 
 function setStatus(message) {
   statusText.value = message;
 }
 
 function centerToPoint(lng, lat) {
-  if (!mapRef.value) return;
+  if (!mapRef.value || !lng || !lat) return;
   mapRef.value.setCenter([lng, lat]);
+}
+
+function hasCoordinates(item) {
+  return item.lng && item.lat && !isNaN(item.lng) && !isNaN(item.lat);
 }
 
 function renderMarkers() {
@@ -49,8 +110,11 @@ function renderMarkers() {
   markerObjs.value.forEach((m) => m.setMap(null));
   markerObjs.value = [];
 
-  markers.value.forEach((m) => {
-    if (!m.lng || !m.lat) return;
+  filteredMarkers.value.forEach((m) => {
+    if (!m.lng || !m.lat || isNaN(m.lng) || isNaN(m.lat)) return;
+
+    const isLost = m.status === 0;
+    const markerColor = isLost ? "marker-lost" : "marker-found";
 
     const marker = new window.AMap.Marker({
       position: [m.lng, m.lat],
@@ -58,7 +122,7 @@ function renderMarkers() {
       title: m.title,
       offset: new window.AMap.Pixel(-17, -48),
       content: `
-        <div class="marker-wrap ${String(highlightId.value) === String(m.id) ? "highlight" : ""}">
+        <div class="marker-wrap ${markerColor} ${String(highlightId.value) === String(m.id) ? "highlight" : ""}">
           <div class="marker-wave"></div>
           <div class="marker-core"></div>
           <div class="marker-label">${m.title || "未命名标记"}</div>
@@ -86,16 +150,50 @@ async function loadMarkers() {
       return;
     }
 
-    markers.value = (data.data || []).map((item, index) => ({
-      id: item.item_id || item.location_id || index + 1,
-      title: item.title || item.name || "未命名标记",
-      detail: item.description || "",
-      lng: Number(item.lng ?? item.longitude),
-      lat: Number(item.lat ?? item.latitude),
-      time: item.create_time || "",
-      status: item.status ?? 0,
-      phone: item.phone || "",
-    }));
+    markers.value = (data.data || []).map((item, index) => {
+      let images = [];
+      if (item.image_urls) {
+        if (Array.isArray(item.image_urls)) {
+          images = item.image_urls;
+        } else if (typeof item.image_urls === 'string' && item.image_urls.trim()) {
+          try {
+            const trimmed = item.image_urls.trim();
+            if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+              images = JSON.parse(trimmed);
+            } else if (trimmed.includes(',')) {
+              images = trimmed.split(',').map(url => url.trim()).filter(url => url);
+            } else {
+              images = [trimmed];
+            }
+          } catch (e) {
+            console.warn("解析图片URL失败:", e);
+            images = [];
+          }
+        }
+      }
+      return {
+        id: item.item_id || item.location_id || index + 1,
+        title: item.title || item.name || "未命名标记",
+        detail: item.description || "",
+        lng: item.lng || item.longitude ? Number(item.lng ?? item.longitude) : null,
+        lat: item.lat ?? item.latitude ? Number(item.lat ?? item.latitude) : null,
+        time: item.create_time || "",
+        status: item.status ?? 0,
+        phone: item.phone || "",
+        images: Array.isArray(images) ? images.map(img => {
+          if (typeof img === 'string') {
+            if (img.startsWith('http://') || img.startsWith('https://')) {
+              return img;
+            }
+            if (img.startsWith('/')) {
+              return `http://127.0.0.1:5000${img}`;
+            }
+            return `http://127.0.0.1:5000/${img}`;
+          }
+          return '';
+        }).filter(img => img) : [],
+      };
+    });
 
     renderMarkers();
     setStatus("标记加载成功");
@@ -123,9 +221,6 @@ function initMap(config) {
 
   mapRef.value.on("click", (e) => {
     pendingWorldPoint.value = { lng: e.lnglat.lng, lat: e.lnglat.lat };
-    pubTitle.value = "";
-    pubDetail.value = "";
-    pubPhone.value = "";
     showPublishModal.value = true;
   });
 }
@@ -145,63 +240,123 @@ async function loadDefaultMap() {
   }
 }
 
-async function submitPublish() {
-  const title = pubTitle.value.trim();
-  const detail = pubDetail.value.trim();
-  const phone = pubPhone.value.trim();
+async function openAddModal() {
+  pendingWorldPoint.value = null;
+  showPublishModal.value = true;
+}
 
-  if (!title || !detail || !pendingWorldPoint.value) {
-    setStatus("标题和描述不能为空");
+function handlePublishSubmit(data) {
+  setStatus("发布成功");
+  pendingWorldPoint.value = null;
+  loadMarkers();
+}
+
+function handlePublishClose() {
+  pendingWorldPoint.value = null;
+  showPublishModal.value = false;
+}
+
+function handleClearLocation() {
+  pendingWorldPoint.value = null;
+}
+
+function handleSelectLocation() {
+  showPublishModal.value = false;
+  setStatus('请在地图上点击选择位置');
+}
+
+function handleItemClick(item) {
+  highlightId.value = item.id;
+  
+  if (clickTimer) {
+    clearTimeout(clickTimer);
     return;
   }
-
-  const userId = localStorage.getItem("user_id");
-
-  try {
-    const res = await fetch(`${API_BASE}/map/publish`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userId,
-        title,
-        detail,
-        phone,
-        lng: pendingWorldPoint.value.lng,
-        lat: pendingWorldPoint.value.lat,
-      }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setStatus("发布成功");
-      showPublishModal.value = false;
-      await loadMarkers();
-    } else {
-      setStatus(data.message || "发布失败");
+  
+  clickTimer = setTimeout(() => {
+    if (hasCoordinates(item)) {
+      centerToPoint(item.lng, item.lat);
+      renderMarkers();
     }
-  } catch (error) {
-    console.error(error);
-    setStatus("发布接口异常");
+    clickTimer = null;
+  }, 250);
+}
+
+function calculateSimilarity(text, keyword) {
+  const textLower = text.toLowerCase();
+  const keywordLower = keyword.toLowerCase();
+  
+  if (!keywordLower || !textLower) return 0;
+  
+  const textLen = textLower.length;
+  const keyLen = keywordLower.length;
+  
+  if (keyLen > textLen) return 0;
+  
+  let matchCount = 0;
+  let lastIndex = -1;
+  let positionBonus = 0;
+  
+  for (let i = 0; i < keyLen; i++) {
+    const idx = textLower.indexOf(keywordLower[i], lastIndex + 1);
+    if (idx === -1) return 0;
+    
+    matchCount++;
+    if (i === 0 && idx === 0) {
+      positionBonus += 0.3;
+    } else if (idx === lastIndex + 1) {
+      positionBonus += 0.1;
+    }
+    lastIndex = idx;
   }
+  
+  const matchRatio = matchCount / keyLen;
+  const textCoverage = keyLen / Math.min(textLen, keyLen * 2);
+  const titleBonus = textLower.startsWith(keywordLower) ? 0.2 : 0;
+  
+  return matchRatio * 0.5 + textCoverage * 0.2 + positionBonus + titleBonus;
 }
 
 function searchByKeyword() {
   const key = searchInput.value.trim().toLowerCase();
-  const hit = markers.value.find((m) =>
-    `${m.title}${m.detail}`.toLowerCase().includes(key),
-  );
-  if (!hit) {
-    setStatus("未找到");
+  if (!key) {
+    setStatus("请输入搜索关键词");
+    highlightId.value = "";
+    renderMarkers();
     return;
   }
-  highlightId.value = hit.id;
-  centerToPoint(hit.lng, hit.lat);
-  renderMarkers();
+
+  const hitsWithSimilarity = markers.value.map((m) => {
+    const text = `${m.title}${m.detail}`;
+    const similarity = calculateSimilarity(text, key);
+    return { ...m, similarity };
+  }).filter((m) => m.similarity > 0);
+
+  hitsWithSimilarity.sort((a, b) => b.similarity - a.similarity);
+
+  searchResults.value = hitsWithSimilarity;
+  showSearchModal.value = true;
+}
+
+function handleSearchResultSelect(item) {
+  showSearchModal.value = false;
+  highlightId.value = item.id;
+  selectedMarker.value = item;
+  showDetailModal.value = true;
+  
+  if (hasCoordinates(item)) {
+    centerToPoint(item.lng, item.lat);
+    renderMarkers();
+  }
+}
+
+function closeSearchModal() {
+  showSearchModal.value = false;
 }
 
 function toggle3DMode() {
   if (!mapRef.value) return;
   is3D.value = !is3D.value;
-  // 保持 3D 渲染模式，仅切换 pitch，避免 setViewMode 引发重绘卡顿
   mapRef.value.setPitch(is3D.value ? 45 : 0);
 }
 
@@ -225,7 +380,7 @@ function openDetail(item) {
 }
 
 function goProfile() {
-  window.location.href = "/profile";
+  router.push("/profile");
 }
 
 watch(
@@ -233,28 +388,38 @@ watch(
   () => nextTick(() => mapRef.value && mapRef.value.resize()),
 );
 
+watch(filterStatus, () => {
+  renderMarkers();
+});
+
 onMounted(async () => {
   await loadDefaultMap();
   await loadMarkers();
+  await loadUserInfo();
+  await loadCategories();
 });
 </script>
 
 <template>
-  <div>
-    <header class="topbar">
-      <h1 class="topbar-title">校园失物招领与位置追踪系统</h1>
-      <div class="topbar-actions">
-        <div class="search-wrap">
-          <input
-            v-model="searchInput"
-            type="text"
-            placeholder="搜索标题/描述并定位"
-            @keydown.enter="searchByKeyword"
-          />
+  <div class="app-home">
+    <AppTopBar variant="home">
+      <template #actions>
+        <div class="topbar-actions">
+          <div class="search-wrap">
+            <input
+              v-model="searchInput"
+              type="text"
+              placeholder="搜索标题/描述并定位"
+              @keydown.enter="searchByKeyword"
+            />
+          </div>
+          <button class="avatar-btn" type="button" title="前往个人主页" @click="goProfile">
+  <img v-if="avatarUrl" :src="avatarUrl" class="avatar-img" />
+  <span v-else>{{ getInitial() }}</span>
+</button>
         </div>
-        <button class="avatar-btn" title="前往个人主页" @click="goProfile">管</button>
-      </div>
-    </header>
+      </template>
+    </AppTopBar>
 
     <main :class="appClass">
       <aside
@@ -264,19 +429,48 @@ onMounted(async () => {
         @dblclick="onListDoubleClick"
       >
         <div class="list-header">
-          标记列表
+          <div class="header-top">
+            <span>标记列表</span>
+            <button class="add-btn" @click="openAddModal">+ 添加</button>
+          </div>
           <div class="list-tip">双击黄色区域展开详细列表（50/50）</div>
+          <div class="filter-tabs">
+            <button
+              :class="{ active: filterStatus === 'all' }"
+              @click="filterStatus = 'all'"
+            >
+              全部 ({{ markers.length }})
+            </button>
+            <button
+              :class="{ active: filterStatus === 'lost' }"
+              @click="filterStatus = 'lost'"
+            >
+              丢失 ({{ markers.filter(m => m.status === 0).length }})
+            </button>
+            <button
+              :class="{ active: filterStatus === 'found' }"
+              @click="filterStatus = 'found'"
+            >
+              拾到 ({{ markers.filter(m => m.status === 1).length }})
+            </button>
+          </div>
         </div>
         <ul class="item-list">
           <li
-            v-for="item in markers"
+            v-for="item in filteredMarkers"
             :key="item.id"
             class="item-card"
-            :class="{ expanded: listExpanded }"
-            @click="centerToPoint(item.lng, item.lat); highlightId = item.id; renderMarkers()"
+            :class="{ expanded: listExpanded, 'status-lost': item.status === 0, 'status-found': item.status === 1 }"
+            @click="handleItemClick(item)"
             @dblclick.stop="openDetail(item)"
           >
-            <div class="item-card-title">{{ item.title }}</div>
+            <div class="item-card-title">
+              <span class="status-badge" :class="item.status === 0 ? 'badge-lost' : 'badge-found'">
+                {{ item.status === 0 ? '丢失' : '拾到' }}
+              </span>
+              {{ item.title }}
+              <span v-if="!hasCoordinates(item)" style="color: #999; font-size: 12px;">(无位置)</span>
+            </div>
             <div>ID：{{ item.id }}</div>
             <div class="item-card-detail">
               <div>描述：{{ item.detail || "无" }}</div>
@@ -328,40 +522,29 @@ onMounted(async () => {
       </section>
     </main>
 
-    <div class="modal-mask" :style="{ display: showPublishModal ? 'flex' : 'none' }">
-      <div class="modal">
-        <h3>发布信息</h3>
-        <div class="form-row">
-          <label for="pubTitle">标题</label>
-          <input id="pubTitle" v-model="pubTitle" type="text" placeholder="请输入标题" />
-        </div>
-        <div class="form-row">
-          <label for="pubDetail">描述</label>
-          <textarea id="pubDetail" v-model="pubDetail" placeholder="请输入详细描述"></textarea>
-        </div>
-        <div class="form-row">
-          <label for="pubPhone">联系方式</label>
-          <input id="pubPhone" v-model="pubPhone" type="text" placeholder="请输入联系方式" />
-        </div>
-        <div class="modal-actions">
-          <button class="btn" type="button" @click="showPublishModal = false">取消</button>
-          <button class="btn primary" type="button" @click="submitPublish">发布</button>
-        </div>
-      </div>
-    </div>
+    <PublishModal
+      :show="showPublishModal"
+      :pendingLocation="pendingWorldPoint"
+      :categories="categories"
+      @close="handlePublishClose"
+      @submit="handlePublishSubmit"
+      @clearLocation="handleClearLocation"
+      @selectLocation="handleSelectLocation"
+    />
 
-    <div class="modal-mask" :style="{ display: showDetailModal ? 'flex' : 'none' }">
-      <div class="modal">
-        <h3>{{ selectedMarker?.title || "详情" }}</h3>
-        <div style="line-height: 1.7; font-size: 14px">
-          <div>描述：{{ selectedMarker?.detail || "无" }}</div>
-          <div>时间：{{ selectedMarker?.time || "未知" }}</div>
-          <div v-if="selectedMarker?.phone">联系方式：{{ selectedMarker.phone }}</div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn primary" type="button" @click="showDetailModal = false">关闭</button>
-        </div>
-      </div>
-    </div>
+    <SearchResultModal
+      :show="showSearchModal"
+      :results="searchResults"
+      :keyword="searchInput"
+      @close="closeSearchModal"
+      @select="handleSearchResultSelect"
+    />
+
+    <MarkerDetailModal
+      :show="showDetailModal"
+      :marker="selectedMarker"
+      @close="showDetailModal = false"
+      @locate="(m) => { highlightId = m.id; centerToPoint(m.lng, m.lat); renderMarkers(); }"
+    />
   </div>
 </template>

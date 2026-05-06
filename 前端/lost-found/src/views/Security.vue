@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue"
+import AppTopBar from "../components/AppTopBar.vue"
 
 const tab = ref("bind")
 const phone = ref("")
@@ -11,21 +12,29 @@ const sendText = ref("获取验证码")
 const sendDisabled = ref(false)
 const bindSuccess = ref(false)
 const pwdSuccess = ref(false)
+const hasChanges = ref(false)
 let countdown = 0
 let timer = null
+
+const originalPhone = ref("")
+const originalOldPwd = ref("")
 
 function switchTab(target) {
   tab.value = target
   window.location.hash = target
 }
-function goProfile() {
+function checkChanges() {
+  if (tab.value === 'bind') {
+    hasChanges.value = phone.value !== originalPhone.value || sms.value !== ""
+  } else {
+    hasChanges.value = oldPwd.value !== "" || newPwd.value !== "" || confirmPwd.value !== ""
+  }
+}
+function cancel() {
   window.location.href = "/profile"
 }
-function goHome() {
-  window.location.href = "/home"
-}
 function sendSms() {
-  if (!phone.value || phone.value.length !== 11) return alert("请输入正确的手机号")
+  if (!phone.value || phone.value.length !== 11) return showToast("请输入正确的手机号", 'warning')
   if (countdown > 0) return
   countdown = 60
   sendDisabled.value = true
@@ -39,25 +48,24 @@ function sendSms() {
       sendText.value = "获取验证码"
     }
   }, 1000)
-  alert("验证码已发送，请查收短信")
+  showToast("验证码已发送，请查收短信", 'success')
 }
 function submitBind() {
-  if (!phone.value || phone.value.length !== 11) return alert("请输入正确的手机号")
-  if (!sms.value || sms.value.length !== 6) return alert("请输入6位验证码")
-  bindSuccess.value = true
-  setTimeout(() => (bindSuccess.value = false), 3000)
+  if (!phone.value || phone.value.length !== 11) return showToast("请输入正确的手机号", 'warning')
+  if (!sms.value || sms.value.length !== 6) return showToast("请输入6位验证码", 'warning')
+  showToast("绑定成功", 'success')
+  setTimeout(() => window.location.href = "/profile", 1000)
 }
 function submitPwd() {
-  if (!oldPwd.value) return alert("请输入当前密码")
-  if (!newPwd.value || newPwd.value.length < 8) return alert("新密码至少8位")
-  if (newPwd.value !== confirmPwd.value) return alert("两次输入的密码不一致")
-  pwdSuccess.value = true
+  if (!oldPwd.value) return showToast("请输入当前密码", 'warning')
+  if (!newPwd.value || newPwd.value.length < 8) return showToast("新密码至少8位", 'warning')
+  if (newPwd.value !== confirmPwd.value) return showToast("两次输入的密码不一致", 'error')
+  showToast("密码修改成功", 'success')
   setTimeout(() => {
-    pwdSuccess.value = false
     oldPwd.value = ""
     newPwd.value = ""
     confirmPwd.value = ""
-  }, 3000)
+  }, 1000)
 }
 
 onMounted(() => {
@@ -68,15 +76,8 @@ onMounted(() => {
 
 <template>
   <div class="page">
-    <div class="topbar">
-      <div class="topbar-title">校园失物招领与位置追踪系统</div>
-      <div class="topbar-user" @click="goProfile">管</div>
-    </div>
+    <AppTopBar variant="inner" />
     <div class="container">
-      <div class="action-bar">
-        <button class="btn" @click="goProfile">返回个人中心</button>
-        <button class="btn btn-primary" @click="goHome">返回主页</button>
-      </div>
       <div class="content-card">
         <div class="card-header">
           <h1 class="card-title">账号安全中心</h1>
@@ -88,22 +89,28 @@ onMounted(() => {
         </div>
         <div v-show="tab === 'bind'" class="panel active">
           <div v-show="bindSuccess" class="success-msg">手机号绑定成功！</div>
-          <div class="form-group"><label>手机号</label><input v-model="phone" type="tel" placeholder="请输入手机号" maxlength="11" /></div>
+          <div class="form-group"><label>手机号</label><input v-model="phone" type="tel" placeholder="请输入手机号" maxlength="11" @input="checkChanges" /></div>
           <div class="form-group">
             <label>短信验证码</label>
             <div class="input-group">
-              <input v-model="sms" type="text" placeholder="请输入验证码" maxlength="6" />
+              <input v-model="sms" type="text" placeholder="请输入验证码" maxlength="6" @input="checkChanges" />
               <button class="btn" :disabled="sendDisabled" @click="sendSms">{{ sendText }}</button>
             </div>
           </div>
-          <button class="btn btn-primary submit-btn" @click="submitBind">确认绑定</button>
+          <div class="button-group">
+            <button class="btn" @click="cancel">{{ hasChanges ? '取消' : '返回' }}</button>
+            <button class="btn btn-primary submit-btn" @click="submitBind">确认绑定</button>
+          </div>
         </div>
         <div v-show="tab === 'password'" class="panel active">
           <div v-show="pwdSuccess" class="success-msg">密码修改成功！</div>
-          <div class="form-group"><label>当前密码</label><input v-model="oldPwd" type="password" placeholder="请输入当前密码" /></div>
-          <div class="form-group"><label>新密码</label><input v-model="newPwd" type="password" placeholder="请输入新密码（8位及以上）" /></div>
-          <div class="form-group"><label>确认新密码</label><input v-model="confirmPwd" type="password" placeholder="请再次输入新密码" /></div>
-          <button class="btn btn-primary submit-btn" @click="submitPwd">确认修改</button>
+          <div class="form-group"><label>当前密码</label><input v-model="oldPwd" type="password" placeholder="请输入当前密码" @input="checkChanges" /></div>
+          <div class="form-group"><label>新密码</label><input v-model="newPwd" type="password" placeholder="请输入新密码（8位及以上）" @input="checkChanges" /></div>
+          <div class="form-group"><label>确认新密码</label><input v-model="confirmPwd" type="password" placeholder="请再次输入新密码" @input="checkChanges" /></div>
+          <div class="button-group">
+            <button class="btn" @click="cancel">{{ hasChanges ? '取消' : '返回' }}</button>
+            <button class="btn btn-primary submit-btn" @click="submitPwd">确认修改</button>
+          </div>
         </div>
       </div>
     </div>

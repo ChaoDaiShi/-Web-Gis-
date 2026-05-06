@@ -4,6 +4,7 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask import session
+import os
 
 # ================== 配置 ==================
 class Config:
@@ -14,6 +15,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     AMAP_WEB_KEY = '49382949a3128467653e88aab0daa5c7'
     AMAP_SECURITY_JS_CODE = '13aaa6de30599d02d3b3f1c562e9bd5e'
+
+    # 管理员登录（可用环境变量覆盖，部署时请修改默认值）
+    ADMIN_EMAIL = os.environ.get('CAMPUS_ADMIN_EMAIL', 'admin@campus.local')
+    ADMIN_PASSWORD = os.environ.get('CAMPUS_ADMIN_PASSWORD', 'admin123')
 
 
 # ================== 初始化 ==================
@@ -30,6 +35,8 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True)
     phone = db.Column(db.String(20))
     avatar_url = db.Column(db.String(500))
+    signature = db.Column(db.String(255))
+    bio = db.Column(db.Text)
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -124,6 +131,45 @@ def login():
             'email': user.email
         }
     }), 200
+
+
+class Admin(db.Model):
+    __tablename__ = 'admin'
+    
+    admin_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return f"<Admin {self.username}>"
+
+
+# ================== 管理员登录 ==================
+@auth_bp.route('/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No input data provided'}), 400
+
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '').strip()
+
+    if not username or not password:
+        return jsonify({'message': '请输入用户名和密码'}), 400
+
+    admin = Admin.query.filter_by(username=username).first()
+    
+    if not admin:
+        return jsonify({'message': '用户名或密码错误'}), 401
+
+    try:
+        if check_password_hash(admin.password_hash, password):
+            return jsonify({'message': '管理员登录成功', 'admin': True}), 200
+    except Exception as e:
+        if admin.password_hash == password:
+            return jsonify({'message': '管理员登录成功', 'admin': True}), 200
+
+    return jsonify({'message': '用户名或密码错误'}), 401
 
 
 # ================== 获取所有用户 ==================

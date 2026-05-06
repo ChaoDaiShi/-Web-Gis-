@@ -15,7 +15,17 @@ const routes = [
   { path: '/profile', component: Profile },
   { path: '/edit', component: EditProfile },
   { path: '/about', component: About },
-  { path: '/admin', component: Admin }
+  {
+    path: '/admin',
+    component: Admin,
+    beforeEnter(to, from, next) {
+      if (localStorage.getItem('is_admin') !== '1') {
+        next('/login')
+      } else {
+        next()
+      }
+    },
+  },
 ]
 
 export default createRouter({

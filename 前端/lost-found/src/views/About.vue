@@ -1,4 +1,6 @@
 <script setup>
+import AppTopBar from "../components/AppTopBar.vue";
+
 function goBack() {
   if (window.history.length > 1) {
     window.history.back();
@@ -13,14 +15,12 @@ function goProfile() {
 </script>
 
 <template>
-  <div>
-    <div class="topbar">
-      <div class="topbar-title">校园失物招领与位置追踪系统</div>
-      <div class="topbar-user" @click="goProfile">管</div>
-    </div>
+  <div class="about-page">
+    <AppTopBar variant="inner" />
 
     <div class="container">
-      <div class="content-card">
+      <div class="scroll-container">
+        <div class="content-card">
         <h1 class="page-title">关于我们</h1>
         <div class="section">
           <h2 class="section-title">平台简介</h2>
@@ -78,6 +78,7 @@ function goProfile() {
         </div>
 
         <button class="back-btn" @click="goBack">返回</button>
+      </div>
       </div>
     </div>
   </div>

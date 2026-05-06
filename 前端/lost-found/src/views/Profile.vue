@@ -1,23 +1,44 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import AppTopBar from "../components/AppTopBar.vue";
+import MarkerDetailModal from "../components/MarkerDetailModal.vue";
 
 const API_BASE = "http://127.0.0.1:5000/api";
 const userId = localStorage.getItem("user_id");
 const activePanel = ref("profile");
+const activePublishTab = ref("all");
 const username = ref("用户名");
 const userIdText = ref("用户ID");
 const email = ref("未填写");
 const phone = ref("未绑定");
 const createTime = ref("未知");
 const bio = ref("暂无个人简介");
+const signature = ref("暂无个性签名");
+const avatarUrl = ref("");
 
 const publishList = ref([]);
 const claimList = ref([]);
 
+const showDetailModal = ref(false);
+const selectedMarker = ref(null);
+
 const formatStatus = (status) => ({ 0: "待认领", 1: "已认领", 2: "已关闭" }[status] || "未知");
+const formatType = (type) => (type === 0 ? "丢失" : "拾到");
 
 const panelClass = (name) => (activePanel.value === name ? "panel" : "panel hidden");
 const activeBtn = (name) => (activePanel.value === name ? "nav-btn active" : "nav-btn");
+const activePublishBtn = (name) => (activePublishTab.value === name ? "publish-tab active" : "publish-tab");
+
+const filteredPublishList = computed(() => {
+  if (activePublishTab.value === "all") {
+    return publishList.value;
+  } else if (activePublishTab.value === "lost") {
+    return publishList.value.filter(item => item.type === 0);
+  } else if (activePublishTab.value === "found") {
+    return publishList.value.filter(item => item.type === 1);
+  }
+  return publishList.value;
+});
 
 const profileRows = computed(() => [
   { label: "邮箱：", value: email.value },
@@ -27,16 +48,19 @@ const profileRows = computed(() => [
 
 async function loadProfile() {
   try {
-    const res = await fetch(`${API_BASE}/auth/users`);
+    const res = await fetch(`${API_BASE}/profile?user_id=${userId}`);
     const data = await res.json();
-    const user = (data || []).find((u) => String(u.user_id) === String(userId));
-    if (!user) return;
-    username.value = user.username || "用户名";
-    userIdText.value = `ID: ${user.user_id || user.id}`;
-    email.value = user.email || "未填写";
-    phone.value = user.phone || "未绑定";
-    createTime.value = user.create_time ? String(user.create_time).slice(0, 10) : "未知";
-    bio.value = user.bio || "暂无个人简介";
+    if (data.success && data.data) {
+      const user = data.data;
+      username.value = user.username || "用户名";
+      userIdText.value = `ID: ${user.user_id || userId}`;
+      email.value = user.email || "未填写";
+      phone.value = user.phone || "未绑定";
+      createTime.value = user.create_time || "未知";
+      bio.value = user.bio || "暂无个人简介";
+      signature.value = user.signature || "暂无个性签名";
+      avatarUrl.value = user.avatar ? `http://127.0.0.1:5000${user.avatar}` : "";
+    }
   } catch (e) {
     console.error(e);
   }
@@ -70,25 +94,40 @@ function switchPanel(panel) {
 
 function goTo(action) {
   if (action === "home") window.location.href = "/home";
-  if (action === "bind") window.location.href = "/security#bind";
-  if (action === "password") window.location.href = "/security#password";
+  if (action === "security") window.location.href = "/security";
   if (action === "edit") window.location.href = "/edit";
   if (action === "about") window.location.href = "/about";
-  if (action === "admin") window.location.href = "/admin";
 }
 
 function logout() {
-  if (!confirm("确定要退出登录吗？")) return;
-  localStorage.removeItem("user_id");
-  localStorage.removeItem("username");
-  localStorage.removeItem("email");
-  window.location.href = "/login";
+  showToast('退出成功', 'success');
+  setTimeout(() => {
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("is_admin");
+    window.location.href = "/login";
+  }, 1000);
+}
+
+function viewDetail(item) {
+  selectedMarker.value = {
+    id: item.item_id,
+    title: item.title,
+    detail: item.description || '',
+    status: item.status,
+    time: item.create_time,
+    images: item.image_urls || [],
+    type: item.type,
+    publisher_id: item.publisher_id
+  };
+  showDetailModal.value = true;
 }
 
 onMounted(() => {
   if (!userId) {
-    alert("请先登录");
-    window.location.href = "/login";
+    showToast("请先登录", 'warning');
+    setTimeout(() => window.location.href = "/login", 1000);
     return;
   }
   loadProfile();
@@ -97,29 +136,28 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="topbar">
-      <div class="topbar-title">校园失物招领与位置追踪系统</div>
-      <div class="topbar-user">管</div>
-    </div>
+    <AppTopBar variant="inner" />
     <div class="container">
       <div class="sidebar">
         <div class="avatar-container">
-          <div class="avatar">👤</div>
+          <div class="avatar">
+            <img v-if="avatarUrl" :src="avatarUrl" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span v-else>👤</span>
+          </div>
           <div>
             <div class="username">{{ username }}</div>
             <div class="user-id">{{ userIdText }}</div>
+            <div class="signature">{{ signature }}</div>
           </div>
         </div>
 
         <div class="nav-buttons">
           <button :class="activeBtn('profile')" @click="switchPanel('profile')">个人资料</button>
-          <button :class="activeBtn('publish')" @click="switchPanel('publish')">失物发布记录</button>
-          <button :class="activeBtn('claim')" @click="switchPanel('claim')">失物认领记录</button>
-          <button class="nav-btn" @click="goTo('bind')">账号安全（手机）</button>
-          <button class="nav-btn" @click="goTo('password')">账号安全（密码）</button>
+          <button :class="activeBtn('publish')" @click="switchPanel('publish')">物品发布记录</button>
+          <button :class="activeBtn('claim')" @click="switchPanel('claim')">物品认领记录</button>
+          <button class="nav-btn" @click="goTo('security')">安全中心</button>
           <button class="nav-btn" @click="goTo('edit')">修改个人资料</button>
           <button class="nav-btn" @click="goTo('home')">返回主页</button>
-          <button class="nav-btn" @click="goTo('admin')">后台面板</button>
         </div>
         <div class="sidebar-footer">
           <a @click="logout">退出登录</a>
@@ -140,39 +178,51 @@ onMounted(() => {
               </div>
             </div>
             <div class="description-area">
+              <label>个性签名：</label>
+              <textarea :value="signature" readonly style="margin-bottom: 15px;" />
+            </div>
+            <div class="description-area">
               <label>个人简介：</label>
               <textarea :value="bio" readonly />
             </div>
           </div>
 
           <div :class="panelClass('publish')">
-            <div class="panel-header"><div class="panel-tab active">全部记录</div></div>
+            <div class="panel-header">
+              <button :class="activePublishBtn('all')" @click="activePublishTab = 'all'">全部记录</button>
+              <button :class="activePublishBtn('lost')" @click="activePublishTab = 'lost'">丢失物品</button>
+              <button :class="activePublishBtn('found')" @click="activePublishTab = 'found'">拾到物品</button>
+            </div>
             <table class="data-table">
-              <thead><tr><th>物品名称</th><th>发布时间</th><th>状态</th><th>操作</th></tr></thead>
+              <thead><tr><th>物品名称</th><th>类型</th><th>发布时间</th><th>状态</th><th>操作</th></tr></thead>
               <tbody>
-                <tr v-for="item in publishList" :key="item.item_id">
+                <tr v-for="item in filteredPublishList" :key="item.item_id">
                   <td>{{ item.title }}</td>
+                  <td :class="item.type === 0 ? 'type-lost' : 'type-found'">{{ formatType(item.type) }}</td>
                   <td>{{ item.create_time }}</td>
                   <td>{{ formatStatus(item.status) }}</td>
-                  <td><a href="#">查看</a></td>
+                  <td><a href="#" @click.stop="viewDetail(item)">查看</a></td>
                 </tr>
-                <tr v-if="publishList.length === 0"><td colspan="4">暂无数据</td></tr>
+                <tr v-if="filteredPublishList.length === 0"><td colspan="5">暂无数据</td></tr>
               </tbody>
             </table>
           </div>
 
           <div :class="panelClass('claim')">
-            <div class="panel-header"><div class="panel-tab active">全部记录</div></div>
+            <div class="panel-header">
+              <div class="panel-tab active">全部记录</div>
+            </div>
             <table class="data-table">
-              <thead><tr><th>物品名称</th><th>认领时间</th><th>状态</th><th>操作</th></tr></thead>
+              <thead><tr><th>物品名称</th><th>类型</th><th>认领时间</th><th>状态</th><th>操作</th></tr></thead>
               <tbody>
                 <tr v-for="item in claimList" :key="item.claim_id">
                   <td>{{ item.title }}</td>
+                  <td :class="item.type === 0 ? 'type-lost' : 'type-found'">{{ formatType(item.type) }}</td>
                   <td>{{ item.create_time }}</td>
                   <td>{{ formatStatus(item.status) }}</td>
-                  <td><a href="#">查看</a></td>
+                  <td><a href="#" @click.stop="viewDetail(item)">查看</a></td>
                 </tr>
-                <tr v-if="claimList.length === 0"><td colspan="4">暂无数据</td></tr>
+                <tr v-if="claimList.length === 0"><td colspan="5">暂无数据</td></tr>
               </tbody>
             </table>
           </div>
@@ -180,6 +230,12 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
+  <MarkerDetailModal
+    :show="showDetailModal"
+    :marker="selectedMarker"
+    @close="showDetailModal = false"
+  />
 </template>
 
 <style scoped src="../assets/个人中心.css"></style>

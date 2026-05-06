@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 
-body {
+.about-page {
     font-family: "Microsoft YaHei", "Arial", sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
@@ -28,7 +28,8 @@ body {
 .topbar-title { font-size: clamp(18px, 2.5vw, 28px); color: #333; font-weight: 500; }
 .topbar-user { width: 42px; height: 42px; border-radius: 50%; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: transform 0.2s; }
 .topbar-user:hover { transform: scale(1.1); }
-.container { max-width: 900px; margin: 80px auto 40px; padding: 0 20px; }
+.container { max-width: 900px; margin: 0 auto; padding: 80px 20px 40px; height: 100vh; }
+.scroll-container { height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; }
 .content-card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); }
 .page-title { text-align: center; font-size: clamp(24px, 4vw, 36px); color: #333; margin-bottom: 30px; position: relative; }
 .page-title::after { content: ""; display: block; width: 60px; height: 4px; background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%); margin: 15px auto 0; border-radius: 2px; }
