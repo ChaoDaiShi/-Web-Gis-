@@ -19,7 +19,9 @@
 
 #### 参与贡献
 
-
+LSC：主要贡献者，实现主要框架
+LYH：实现用户相关的代码
+THR: 实现管理员相关的代码
 
 
 #### 更新
@@ -32,14 +34,26 @@
     LSC2：
         修改了主页页面，增加了地图，打开默认为本校区地图，可以对地图上做标记；优化了标记，使标记更加明显
 
+<<<<<<< Updated upstream
+=======
+    LSC3:
+        重构前端代码，删去了由axure原型转html文件所附带的内容，前端结构更清晰，增加了后端代码，实现了数据库存储地图坐标，实现了登录时的后端验证
+
+    LSC4:
+        重构前端代码，接入vue页面，现在开始正式弃用html+css+js模式。
+
+    LSC5:
+        完善代码，实现大部分功能，包括但不限于发布页面、个人中心，修复了部分页面无法滚动的问题，优化了个人中心、登录界面。
+
+    LSC6:
+        上传了LSC5版本没有上传的文件。
+
+    LSC7：（重要）
+        完善代码，主要增加了报修功能的实现，增加了对地图操作的优化，修改了地图标记显示逻。
+        合并LYH的代码，实现了申请认领、申请归还、通知审核等功能，修复了部分已知bug，优化了物品发布记录的状态显示，优化了各大功能逻辑。
+        优化了申请页面，现在申请页面已经变成弹窗，优化了顶部栏，增加了校徽图标
+>>>>>>> Stashed changes
 
 
 
-#### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
