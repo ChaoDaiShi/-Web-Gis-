@@ -41,6 +41,10 @@ function switchToAdmin() {
   mode.value = "admin";
 }
 
+function goToResetPassword() {
+  router.push("/security#password");
+}
+
 function showToast(message) {
   const existingToast = document.querySelector('.login-toast');
   if (existingToast) {
@@ -283,6 +287,11 @@ async function submitAdmin() {
           <button class="login-btn" type="button" @click="submit">
             {{ mode === "login" ? "登录" : "注册" }}
           </button>
+
+          <div v-show="mode === 'login'" class="forgot-password">
+            <span>忘记密码？</span>
+            <button class="forgot-btn" @click="goToResetPassword">点击修改</button>
+          </div>
         </div>
 
         <div v-show="mode === 'admin'" class="form-container">
@@ -523,6 +532,32 @@ async function submitAdmin() {
 .login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+}
+
+.forgot-password {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.forgot-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.forgot-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  text-decoration: underline;
 }
 
 .divider {

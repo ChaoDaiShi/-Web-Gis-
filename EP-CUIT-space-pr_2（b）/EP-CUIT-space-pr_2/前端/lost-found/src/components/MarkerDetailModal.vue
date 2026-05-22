@@ -16,6 +16,10 @@ const props = defineProps({
   showPublisherInfo: {
     type: Boolean,
     default: true
+  },
+  showLocateButton: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -260,7 +264,11 @@ function getInitial() {
               <span class="coord-label" style="margin-left: 16px;">纬度：</span>
               <span>{{ marker.lat }}</span>
             </div>
-            <button class="btn location-btn" @click="() => { $emit('locate', marker); handleClose(); }">
+            <button 
+              v-if="showLocateButton"
+              class="btn location-btn" 
+              @click="() => { $emit('locate', marker); handleClose(); }"
+            >
               📍 定位到地图
             </button>
           </div>

@@ -183,6 +183,47 @@ def admin_login():
     return jsonify({'message': '用户名或密码错误'}), 401
 
 
+# ================== 修改邮箱 ==================
+@auth_bp.route('/change-email', methods=['POST'])
+def change_email():
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No input data provided'}), 400
+    
+    user_id = data.get('user_id')
+    password = data.get('password')
+    new_email = data.get('new_email')
+    
+    if not user_id or not password or not new_email:
+        return jsonify({'success': False, 'message': '缺少必要参数'}), 400
+    
+    user = User.query.get(user_id)
+    
+    if not user:
+        return jsonify({'success': False, 'message': '用户不存在'}), 400
+    
+    try:
+        if not check_password_hash(user.password_hash, password):
+            return jsonify({'success': False, 'message': '密码不正确'}), 400
+    except Exception as e:
+        if user.password_hash != password:
+            return jsonify({'success': False, 'message': '密码不正确'}), 400
+    
+    existing_user = User.query.filter_by(email=new_email).first()
+    if existing_user and existing_user.user_id != user.user_id:
+        return jsonify({'success': False, 'message': '该邮箱已被注册'}), 400
+    
+    user.email = new_email
+    
+    try:
+        db.session.commit()
+        return jsonify({'success': True, 'message': '邮箱修改成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 # ================== 修改密码 ==================
 @auth_bp.route('/change-password', methods=['POST'])
 def change_password():

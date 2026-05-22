@@ -590,6 +590,7 @@ onMounted(() => {
       :show="showDetailModal" 
       :marker="currentItem" 
       :show-action-buttons="false"
+      :show-locate-button="false"
       @close="closeDetailModal" 
     />
   </div>
