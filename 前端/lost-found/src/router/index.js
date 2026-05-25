@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Security from '../views/Security.vue'
+import Security from '../components/Security.vue'
 import Login from '../views/Login.vue'
-import Profile from '../views/Profile.vue'
-import EditProfile from '../views/EditProfile.vue'
-import About from '../views/About.vue'
+import Profile from '../components/Profile.vue'
+import EditProfile from '../components/EditProfile.vue'
+import About from '../components/About.vue'
 import Admin from '../views/Admin.vue'
-import Messages from '../views/Messages.vue'
-import ClaimForm from '../views/ClaimForm.vue'
-import ReturnForm from '../views/ReturnForm.vue'
+import Messages from '../components/Messages.vue'
+import ClaimForm from '../components/ClaimForm.vue'
+import ReturnForm from '../components/ReturnForm.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },

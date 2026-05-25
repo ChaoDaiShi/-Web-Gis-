@@ -1,5 +1,8 @@
+<!-- 归还表单 -->
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
+
+const showToast = window.showToast;
 
 const props = defineProps({
   show: {
@@ -9,6 +12,10 @@ const props = defineProps({
   item: {
     type: Object,
     default: null
+  },
+  username: {
+    type: String,
+    default: ""
   }
 });
 
@@ -33,23 +40,91 @@ let originalFormData = "";
 const verificationCode = ref('');
 const generatedCode = ref('');
 
+const isSubmitting = ref(false);
+const MAX_IMAGES = 5;
+const previewImages = ref([]);
+
+const DRAFT_KEY_PREFIX = 'return_form_draft_';
+
 function generateCode() {
   generatedCode.value = Math.random().toString().substring(2, 7);
 }
 
+function getDraftKey() {
+  const itemId = props.item?.id || props.item?.item_id || 'no_item';
+  return `${DRAFT_KEY_PREFIX}${itemId}`;
+}
+
 function saveDraft() {
-  localStorage.setItem('returnFormDraft', JSON.stringify(formData.value));
-  localStorage.setItem('returnFormItemId', formData.value.item_id);
+  const draftData = {
+    formData: { ...formData.value },
+    timestamp: Date.now()
+  };
+  localStorage.setItem(getDraftKey(), JSON.stringify(draftData));
+  console.log('草稿已保存:', getDraftKey());
+}
+
+function loadDraft() {
+  const draftStr = localStorage.getItem(getDraftKey());
+  if (draftStr) {
+    try {
+      const draftData = JSON.parse(draftStr);
+      return draftData.formData;
+    } catch (e) {
+      console.error('加载草稿失败:', e);
+      return null;
+    }
+  }
+  return null;
 }
 
 function clearDraft() {
-  localStorage.removeItem('returnFormDraft');
-  localStorage.removeItem('returnFormItemId');
+  localStorage.removeItem(getDraftKey());
+  console.log('草稿已清除:', getDraftKey());
 }
 
-const isSubmitting = ref(false);
-const MAX_IMAGES = 5;
-const previewImages = ref([]);
+function checkAndRestoreDraft() {
+  const draft = loadDraft();
+  if (draft) {
+    if (confirm("检测到未完成的归还申请，是否恢复？")) {
+      Object.assign(formData.value, draft);
+      console.log('草稿已恢复:', formData.value);
+    }
+    clearDraft();
+  }
+}
+
+function handleBeforeUnload(e) {
+  if (isFormModified.value) {
+    e.preventDefault();
+    e.returnValue = '';
+    saveDraft();
+  }
+}
+
+watch(() => props.show, (newShow) => {
+  if (newShow) {
+    const storedUsername = localStorage.getItem('username') || '';
+    formData.value.username = props.username || storedUsername;
+    
+    if (props.item) {
+      formData.value.item_id = props.item.id || props.item.item_id;
+    }
+    
+    generateCode();
+    
+    setTimeout(() => {
+      originalFormData = JSON.stringify(formData.value);
+      checkAndRestoreDraft();
+    }, 100);
+  }
+});
+
+watch(formData, (newVal) => {
+  if (originalFormData) {
+    isFormModified.value = JSON.stringify(newVal) !== originalFormData;
+  }
+}, { deep: true });
 
 async function submitReturn() {
   if (!validateForm()) {
@@ -82,45 +157,45 @@ async function submitReturn() {
     const result = await response.json();
     
     if (result.success) {
-      alert("归还申请提交成功，请等待审核");
       clearDraft();
       isFormModified.value = false;
+      showToast("归还申请提交成功，请等待审核", "success");
       emit('success');
       handleCancel();
     } else {
-      alert("提交失败: " + (result.message || "请重试"));
+      showToast("提交失败: " + (result.message || "请重试"), "error");
     }
   } catch (error) {
     console.error("提交归还申请失败:", error);
-    alert("提交失败，请检查网络连接后重试");
+    showToast("提交失败，请检查网络连接后重试", "error");
   } finally {
     isSubmitting.value = false;
   }
 }
 
 function validateForm() {
-  if (!formData.value.applicant_phone.trim()) {
-    alert("请输入联系方式（电话/QQ/微信/邮箱）");
+  if (!formData.value.applicant_phone?.trim()) {
+    showToast("请输入联系方式（电话/QQ/微信/邮箱）", "warning");
     return false;
   }
   
-  if (!formData.value.return_reason.trim()) {
-    alert("请输入归还理由");
+  if (!formData.value.return_reason?.trim()) {
+    showToast("请输入归还理由", "warning");
     return false;
   }
   
-  if (!formData.value.item_description.trim()) {
-    alert("请输入物品特征描述");
+  if (!formData.value.item_description?.trim()) {
+    showToast("请输入物品特征描述", "warning");
     return false;
   }
   
-  if (!verificationCode.value.trim()) {
-    alert("请输入验证码");
+  if (!verificationCode.value?.trim()) {
+    showToast("请输入验证码", "warning");
     return false;
   }
   
   if (verificationCode.value !== generatedCode.value) {
-    alert("验证码输入错误，请重试");
+    showToast("验证码输入错误，请重试", "error");
     generateCode();
     verificationCode.value = '';
     return false;
@@ -129,13 +204,20 @@ function validateForm() {
   return true;
 }
 
-function handleCancel() {
-  if (isFormModified.value) {
-    if (confirm("表单内容已修改，是否保存草稿？")) {
-      saveDraft();
-    }
-  }
-  emit('close');
+function resetForm() {
+  formData.value = {
+    item_id: "",
+    username: "",
+    applicant_name: "",
+    applicant_phone: "",
+    return_reason: "",
+    item_description: "",
+    proof_images: []
+  };
+  previewImages.value = [];
+  verificationCode.value = '';
+  isFormModified.value = false;
+  originalFormData = "";
 }
 
 function handleImageUpload(event) {
@@ -163,40 +245,25 @@ function removeImage(index) {
   previewImages.value.splice(index, 1);
 }
 
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    const storedUsername = localStorage.getItem('username') || '';
-    formData.value.username = props.username || storedUsername;
-    
-    if (props.item) {
-      formData.value.item_id = props.item.item_id;
+function handleCancel() {
+  if (isFormModified.value) {
+    const choice = confirm("表单内容已修改，是否保存草稿？");
+    if (choice) {
+      saveDraft();
+      showToast("草稿已保存，下次打开时可以恢复", "success");
     }
-    
-    generateCode();
-    
-    const draft = localStorage.getItem('returnFormDraft');
-    const draftItemId = localStorage.getItem('returnFormItemId');
-    const currentItemId = props.item ? props.item.item_id : '';
-    
-    if (draft && draftItemId === currentItemId) {
-      if (confirm("检测到未完成的归还申请，是否恢复？")) {
-        const draftData = JSON.parse(draft);
-        Object.assign(formData.value, draftData);
-      }
-      clearDraft();
-    }
-    
-    setTimeout(() => {
-      originalFormData = JSON.stringify(formData.value);
-    }, 100);
   }
+  resetForm();
+  emit('close');
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload);
 });
 
-watch(formData, (newVal) => {
-  if (originalFormData) {
-    isFormModified.value = JSON.stringify(newVal) !== originalFormData;
-  }
-}, { deep: true });
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+});
 </script>
 
 <template>
@@ -211,7 +278,7 @@ watch(formData, (newVal) => {
         <div class="modal-body">
           <div v-if="item" class="item-preview">
             <div class="preview-title">归还物品: {{ item.title }}</div>
-            <div class="preview-info">物品ID: {{ item.item_id }}</div>
+            <div class="preview-info">物品ID: {{ item.id || item.item_id }}</div>
           </div>
           <div v-else class="item-preview no-item">
             <div class="preview-title">📋 自主归还申请</div>

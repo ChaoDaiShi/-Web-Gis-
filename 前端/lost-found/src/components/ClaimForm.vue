@@ -1,5 +1,8 @@
+<!-- 认领表单 -->
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from "vue";
+
+const showToast = window.showToast;
 
 const props = defineProps({
   show: Boolean,
@@ -42,29 +45,51 @@ const isSubmitting = ref(false);
 const MAX_IMAGES = 5;
 const previewImages = ref([]);
 
+const DRAFT_KEY_PREFIX = 'claim_form_draft_';
+
 function generateCode() {
   generatedCode.value = Math.random().toString().substring(2, 7);
 }
 
+function getDraftKey() {
+  const itemId = props.item?.id || props.item?.item_id || 'no_item';
+  return `${DRAFT_KEY_PREFIX}${itemId}`;
+}
+
 function saveDraft() {
-  localStorage.setItem('claimFormDraft', JSON.stringify(formData.value));
-  localStorage.setItem('claimFormItemId', formData.value.item_id);
+  const draftData = {
+    formData: { ...formData.value },
+    timestamp: Date.now()
+  };
+  localStorage.setItem(getDraftKey(), JSON.stringify(draftData));
+  console.log('草稿已保存:', getDraftKey());
+}
+
+function loadDraft() {
+  const draftStr = localStorage.getItem(getDraftKey());
+  if (draftStr) {
+    try {
+      const draftData = JSON.parse(draftStr);
+      return draftData.formData;
+    } catch (e) {
+      console.error('加载草稿失败:', e);
+      return null;
+    }
+  }
+  return null;
 }
 
 function clearDraft() {
-  localStorage.removeItem('claimFormDraft');
-  localStorage.removeItem('claimFormItemId');
+  localStorage.removeItem(getDraftKey());
+  console.log('草稿已清除:', getDraftKey());
 }
 
 function checkAndRestoreDraft() {
-  const draft = localStorage.getItem('claimFormDraft');
-  const draftItemId = localStorage.getItem('claimFormItemId');
-  const currentItemId = props.item?.id || props.item?.item_id || '';
-  
-  if (draft && draftItemId === currentItemId) {
+  const draft = loadDraft();
+  if (draft) {
     if (confirm("检测到未完成的认领申请，是否恢复？")) {
-      const draftData = JSON.parse(draft);
-      Object.assign(formData.value, draftData);
+      Object.assign(formData.value, draft);
+      console.log('草稿已恢复:', formData.value);
     }
     clearDraft();
   }
@@ -88,12 +113,7 @@ watch(() => props.show, (newShow) => {
     setTimeout(() => {
       originalFormData = JSON.stringify(formData.value);
       checkAndRestoreDraft();
-    }, 300);
-  } else {
-    if (isFormModified.value) {
-      saveDraft();
-    }
-    resetForm();
+    }, 100);
   }
 });
 
@@ -132,10 +152,20 @@ async function submitClaim() {
       formDataToSubmit.append(`proof_images[${index}]`, image.file);
     });
     
+    console.log('DEBUG: 准备提交表单');
+    console.log('DEBUG: API地址:', `${API_BASE}/admin/claim-forms`);
+    console.log('DEBUG: 图片数量:', previewImages.value.length);
+    console.log('DEBUG: FormData内容:');
+    for (let [key, value] of formDataToSubmit.entries()) {
+      console.log(`  ${key}:`, typeof value === 'object' ? `[File: ${value.name}]` : value);
+    }
+    
     const response = await fetch(`${API_BASE}/admin/claim-forms`, {
       method: "POST",
       body: formDataToSubmit,
     });
+    
+    console.log('DEBUG: 请求已发送，响应状态:', response.status);
     
     const data = await response.json();
     
@@ -144,39 +174,39 @@ async function submitClaim() {
       isFormModified.value = false;
       emit('success');
     } else {
-      alert("提交失败: " + (data.message || "请重试"));
+      showToast("提交失败: " + (data.message || "请重试"), "error");
     }
   } catch (error) {
     console.error("提交认领申请失败:", error);
-    alert("提交失败，请检查网络连接后重试");
+    showToast("提交失败，请检查网络连接后重试", "error");
   } finally {
     isSubmitting.value = false;
   }
 }
 
 function validateForm() {
-  if (!formData.value.applicant_phone.trim()) {
-    alert("请输入联系方式（电话/QQ/微信/邮箱）");
+  if (!formData.value.applicant_phone?.trim()) {
+    showToast("请输入联系方式（电话/QQ/微信/邮箱）", "warning");
     return false;
   }
   
-  if (!formData.value.claim_reason.trim()) {
-    alert("请输入认领理由");
+  if (!formData.value.claim_reason?.trim()) {
+    showToast("请输入认领理由", "warning");
     return false;
   }
   
-  if (!formData.value.item_description.trim()) {
-    alert("请输入物品特征描述");
+  if (!formData.value.item_description?.trim()) {
+    showToast("请输入物品特征描述", "warning");
     return false;
   }
   
-  if (!verificationCode.value.trim()) {
-    alert("请输入验证码");
+  if (!verificationCode.value?.trim()) {
+    showToast("请输入验证码", "warning");
     return false;
   }
   
   if (verificationCode.value !== generatedCode.value) {
-    alert("验证码输入错误，请重试");
+    showToast("验证码输入错误，请重试", "error");
     generateCode();
     verificationCode.value = '';
     return false;
@@ -228,11 +258,13 @@ function removeImage(index) {
 
 function handleCancel() {
   if (isFormModified.value) {
-    const choice = confirm("表单内容已修改，是否保存后再离开？");
+    const choice = confirm("表单内容已修改，是否保存草稿？");
     if (choice) {
       saveDraft();
+      showToast("草稿已保存，下次打开时可以恢复", "success");
     }
   }
+  resetForm();
   emit('cancel');
 }
 
@@ -486,13 +518,6 @@ onUnmounted(() => {
 .preview-info {
   color: #666;
   font-size: 14px;
-}
-
-.preview-hint {
-  color: #33ccff;
-  font-size: 12px;
-  margin-top: 8px;
-  text-align: right;
 }
 
 .item-preview.no-item {

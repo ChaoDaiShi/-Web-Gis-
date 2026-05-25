@@ -1,5 +1,5 @@
-<script setup>import { computed } from 'vue';
-const props = defineProps({
+<!-- 搜索结果弹窗 -->
+<script setup>defineProps({
  show: Boolean,
  results: {
  type: Array,

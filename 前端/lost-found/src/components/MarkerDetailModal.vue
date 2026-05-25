@@ -1,13 +1,28 @@
+<!-- 标记详情弹窗 -->
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import ClaimForm from './ClaimForm.vue';
 import ReturnForm from './ReturnForm.vue';
+
+const showToast = window.showToast;
 
 const props = defineProps({
   show: Boolean,
   marker: {
     type: Object,
     default: null
+  },
+  showActionButtons: {
+    type: Boolean,
+    default: true
+  },
+  showPublisherInfo: {
+    type: Boolean,
+    default: true
+  },
+  showLocateButton: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -39,7 +54,7 @@ function getImages(marker) {
       try {
         const parsed = JSON.parse(marker.image_urls);
         images = Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
+      } catch {
         images = [];
       }
     }
@@ -59,12 +74,12 @@ function getImages(marker) {
   }).filter(img => img);
 }
 
-function getStatusText(status) {
-  return status === 0 ? '丢失物品' : '拾到物品';
+function getStatusText(type) {
+  return type === 0 ? '丢失物品' : '拾到物品';
 }
 
-function getStatusClass(status) {
-  return status === 0 ? 'text-lost' : 'text-found';
+function getStatusClass(type) {
+  return type === 0 ? 'text-lost' : 'text-found';
 }
 
 async function loadPublisherInfo(userId) {
@@ -125,7 +140,7 @@ function canClaim() {
 
 function handleClaim() {
   if (!canClaim()) {
-    alert('只能申请认领其他用户拾到的物品');
+    showToast('只能申请认领其他用户拾到的物品', "warning");
     return;
   }
   
@@ -144,7 +159,7 @@ function canReturn() {
 
 function handleReturn() {
   if (!canReturn()) {
-    alert('只能申请归还其他用户丢失的物品');
+    showToast('只能申请归还其他用户丢失的物品', "warning");
     return;
   }
   
@@ -162,7 +177,7 @@ function canDelete() {
 
 function handleDelete() {
   if (!canDelete()) {
-    alert('只能删除自己发布的物品');
+    showToast('只能删除自己发布的物品', "warning");
     return;
   }
   
@@ -182,7 +197,7 @@ function handleClaimFormCancel() {
 
 function handleClaimFormSuccess() {
   showClaimForm.value = false;
-  alert('认领申请提交成功，请等待审核');
+  showToast('认领申请提交成功，请等待审核', "success");
   handleClose();
 }
 
@@ -192,7 +207,7 @@ function handleReturnFormCancel() {
 
 function handleReturnFormSuccess() {
   showReturnForm.value = false;
-  alert('归还申请提交成功，请等待审核');
+  showToast('归还申请提交成功，请等待审核', "success");
   handleClose();
 }
 
@@ -222,8 +237,8 @@ function getInitial() {
         <div class="info-section">
           <div class="info-row">
             <span class="info-label">状态：</span>
-            <span :class="getStatusClass(marker?.status)">
-              {{ getStatusText(marker?.status) }}
+            <span :class="getStatusClass(marker?.type)">
+              {{ getStatusText(marker?.type) }}
             </span>
           </div>
           
@@ -252,7 +267,11 @@ function getInitial() {
               <span class="coord-label" style="margin-left: 16px;">纬度：</span>
               <span>{{ marker.lat }}</span>
             </div>
-            <button class="btn location-btn" @click="() => { $emit('locate', marker); handleClose(); }">
+            <button 
+              v-if="showLocateButton"
+              class="btn location-btn" 
+              @click="() => { $emit('locate', marker); handleClose(); }"
+            >
               📍 定位到地图
             </button>
           </div>
@@ -261,7 +280,7 @@ function getInitial() {
           <span>🔍 暂无位置信息</span>
         </div>
         
-        <div class="publisher-section">
+        <div v-if="showPublisherInfo" class="publisher-section">
           <div class="section-title">发布者信息</div>
           <div v-if="loadingPublisher" class="loading-publisher">
             加载中...
@@ -288,21 +307,23 @@ function getInitial() {
       </div>
       
       <div class="modal-footer">
-        <button 
-          v-if="canClaim()" 
-          class="btn claim" 
-          @click="handleClaim"
-        >申请认领</button>
-        <button 
-          v-else-if="canReturn()" 
-          class="btn claim" 
-          @click="handleReturn"
-        >归还物品</button>
-        <button 
-          v-else 
-          class="btn claim disabled" 
-          disabled
-        >申请认领</button>
+        <template v-if="showActionButtons">
+          <button 
+            v-if="canClaim()" 
+            class="btn claim" 
+            @click="handleClaim"
+          >申请认领</button>
+          <button 
+            v-else-if="canReturn()" 
+            class="btn claim" 
+            @click="handleReturn"
+          >归还物品</button>
+          <button 
+            v-else 
+            class="btn claim disabled" 
+            disabled
+          >申请认领</button>
+        </template>
         <button v-if="canDelete()" class="btn delete" @click="handleDelete">删除</button>
         <button class="btn primary" @click="handleClose">关闭</button>
       </div>

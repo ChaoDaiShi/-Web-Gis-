@@ -1,9 +1,12 @@
+<!-- 管理员页面 -->
 <script setup>
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AppTopBar from "../components/AppTopBar.vue";
+import MarkerDetailModal from "../components/MarkerDetailModal.vue";
 
 const router = useRouter();
+const showToast = window.showToast;
 
 const showDetailModal = ref(false);
 const detailTitle = ref('');
@@ -19,11 +22,59 @@ function closeDetailModal() {
   showDetailModal.value = false;
 }
 
-const showItemDetailModal = ref(false);
-const currentItem = ref(null);
+const showMarkerDetailModal = ref(false);
+const selectedMarker = ref(null);
 
-function showToast(message, type = 'success') {
-  alert(message);
+const showImageModal = ref(false);
+const previewImages = ref([]);
+const currentImageIndex = ref(0);
+
+
+
+function showImage(proofImages) {
+  try {
+    let images = [];
+    if (typeof proofImages === 'string') {
+      images = JSON.parse(proofImages);
+    } else if (Array.isArray(proofImages)) {
+      images = proofImages;
+    }
+    previewImages.value = images.map(img => {
+      if (img.startsWith('data:image/')) {
+        return img;
+      }
+      if (img.startsWith('http://') || img.startsWith('https://')) {
+        return img;
+      }
+      if (img.startsWith('/')) {
+        return `http://127.0.0.1:5000${img}`;
+      }
+      return `http://127.0.0.1:5000/${img}`;
+    }).filter(img => img);
+    currentImageIndex.value = 0;
+    showImageModal.value = true;
+  } catch (e) {
+    console.error('解析图片数据失败:', e);
+    showToast('无法解析图片数据', 'error');
+  }
+}
+
+function closeImageModal() {
+  showImageModal.value = false;
+  previewImages.value = [];
+  currentImageIndex.value = 0;
+}
+
+function prevImage() {
+  if (currentImageIndex.value > 0) {
+    currentImageIndex.value--;
+  }
+}
+
+function nextImage() {
+  if (currentImageIndex.value < previewImages.value.length - 1) {
+    currentImageIndex.value++;
+  }
 }
 
 async function viewClaimDetail(index) {
@@ -40,8 +91,20 @@ async function viewClaimDetail(index) {
     const data = await res.json();
     
     if (data.success) {
-      currentItem.value = data.data;
-      showItemDetailModal.value = true;
+      const item = data.data;
+      selectedMarker.value = {
+        id: item.item_id,
+        title: item.title,
+        detail: item.description || '',
+        status: item.status,
+        time: item.create_time,
+        images: item.image_urls || [],
+        type: item.type,
+        publisher_id: item.publisher_id,
+        lng: item.longitude,
+        lat: item.latitude
+      };
+      showMarkerDetailModal.value = true;
     } else {
       showToast('获取物品详情失败', 'error');
     }
@@ -65,8 +128,20 @@ async function viewReturnDetail(index) {
     const data = await res.json();
     
     if (data.success) {
-      currentItem.value = data.data;
-      showItemDetailModal.value = true;
+      const item = data.data;
+      selectedMarker.value = {
+        id: item.item_id,
+        title: item.title,
+        detail: item.description || '',
+        status: item.status,
+        time: item.create_time,
+        images: item.image_urls || [],
+        type: item.type,
+        publisher_id: item.publisher_id,
+        lng: item.longitude,
+        lat: item.latitude
+      };
+      showMarkerDetailModal.value = true;
     } else {
       showToast('获取物品详情失败', 'error');
     }
@@ -76,9 +151,9 @@ async function viewReturnDetail(index) {
   }
 }
 
-function closeItemDetailModal() {
-  showItemDetailModal.value = false;
-  currentItem.value = null;
+function closeMarkerDetailModal() {
+  showMarkerDetailModal.value = false;
+  selectedMarker.value = null;
 }
 
 const tables = ref({
@@ -96,13 +171,13 @@ const tables = ref({
   },
   claimForms: {
     label: "认领表单审核表",
-    columns: ["认领ID", "物品ID", "认领人姓名", "联系电话", "电子邮箱", "认领理由", "物品描述", "状态", "提交时间"],
+    columns: ["认领ID", "物品ID", "认领人姓名", "联系方式", "物品图片", "认领理由", "物品描述", "状态", "提交时间"],
     rows: [],
     api: "claim-forms"
   },
   returnForms: {
     label: "归还表单审核表",
-    columns: ["归还ID", "物品ID", "归还人姓名", "联系电话", "电子邮箱", "归还理由", "归还地点", "状态", "提交时间"],
+    columns: ["归还ID", "物品ID", "归还人姓名", "联系方式", "物品图片", "归还理由", "物品描述", "状态", "提交时间"],
     rows: [],
     api: "return-forms"
   },
@@ -144,19 +219,7 @@ async function loadTableData() {
     const res = await fetch(`http://127.0.0.1:5000/api/admin/${table.value.api}`);
     const data = await res.json();
     
-    const idFieldMap = {
-      lostItems: 'item_id',
-      claims: 'claim_id',
-      claimForms: 'claim_id',
-      returnForms: 'return_id',
-      users: 'user_id',
-      categories: 'category_id',
-      locations: 'location_id'
-    };
-    
-    const idField = idFieldMap[currentTable.value];
-    
-    tables.value[currentTable.value].rows = data.map((item, index) => {
+    tables.value[currentTable.value].rows = data.map((item) => {
       const row = {};
       table.value.columns.forEach((col) => {
         const fieldMap = {
@@ -173,7 +236,7 @@ async function loadTableData() {
           '认领ID': item.claim_id,
           '认领人ID': item.claimer_id,
           '认领留言': item.message,
-          '认领时间': item.create_time,
+          '认领时间': item.create_time || item.claim_time,
           '用户ID': item.user_id,
           '用户名': item.username,
           '邮箱': item.email,
@@ -181,24 +244,22 @@ async function loadTableData() {
           '头像URL': item.avatar_url,
           '个性签名': item.signature,
           '个人简介': item.bio,
-          '创建时间': item.create_time,
-          '分类ID': item.category_id,
+          '创建时间': item.created_at || item.create_time,
           '分类名称': item.name,
-          '位置ID': item.location_id,
-          '位置名称': item.name,
+          '位置名称': item.location_name,
           '纬度': item.latitude,
           '经度': item.longitude,
           '详细地址': item.detail,
           '认领人姓名': item.applicant_name,
-          '联系电话': item.applicant_phone,
-          '电子邮箱': item.applicant_email,
+          '联系方式': item.applicant_phone,
+          '物品图片': item.proof_images,
           '认领理由': item.claim_reason,
           '物品描述': item.item_description,
-          '提交时间': item.create_time,
+          '提交时间': item.submit_time || item.create_time,
           '归还ID': item.return_id,
-          '归还人姓名': item.returner_name,
+          '归还人姓名': item.applicant_name,
           '归还理由': item.return_reason,
-          '归还地点': item.return_location
+          '物品描述': item.item_description
         };
         row[col] = fieldMap[col] ?? "";
       });
@@ -516,6 +577,14 @@ onMounted(() => {
                 <template v-else-if="col === '物品描述' && row[col]">
                   <span class="view-link" @click="showDetail('物品描述', row[col])">点击查看</span>
                 </template>
+                <template v-else-if="col === '物品图片'">
+                  <template v-if="row[col] && row[col] !== '' && row[col] !== '[]'">
+                    <span class="view-link" @click="showImage(row[col])">查看图片</span>
+                  </template>
+                  <template v-else>
+                    <span style="color: #999; font-size: 12px;">无图片</span>
+                  </template>
+                </template>
                 <template v-else>
                   {{ row[col] ?? "" }}
                 </template>
@@ -544,46 +613,12 @@ onMounted(() => {
     </main>
   </div>
   
-  <div v-if="showItemDetailModal && currentItem" class="item-detail-modal-overlay" @click="closeItemDetailModal">
-    <div class="item-detail-modal" @click.stop>
-      <div class="item-detail-header">
-        <h3>{{ currentItem.title }}</h3>
-        <button class="close-btn" @click="closeItemDetailModal">&times;</button>
-      </div>
-      <div class="item-detail-body">
-        <div class="item-detail-section">
-          <span class="label">状态：</span>
-          <span :class="currentItem.type === 0 ? 'status-lost' : 'status-found'">
-            {{ currentItem.type === 0 ? '丢失物品' : '拾到物品' }}
-          </span>
-        </div>
-        <div class="item-detail-section">
-          <span class="label">描述：</span>
-          <span>{{ currentItem.description }}</span>
-        </div>
-        <div class="item-detail-section">
-          <span class="label">发布时间：</span>
-          <span>{{ currentItem.create_time }}</span>
-        </div>
-        <div class="item-detail-section location-section">
-          <span class="label">位置信息：</span>
-          <div class="location-info">
-            <span>经度：{{ currentItem.lng }}</span>
-            <span>纬度：{{ currentItem.lat }}</span>
-          </div>
-        </div>
-        <div class="item-detail-section">
-          <span class="label">发布者ID：</span>
-          <div class="publisher-info">
-            <span>{{ currentItem.publisher_id || '暂无发布者信息' }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="item-detail-footer">
-        <button class="close-btn" @click="closeItemDetailModal">关闭</button>
-      </div>
-    </div>
-  </div>
+  <MarkerDetailModal
+    :show="showMarkerDetailModal"
+    :marker="selectedMarker"
+    :show-action-buttons="false"
+    @close="closeMarkerDetailModal"
+  />
   
   <div v-if="showDetailModal" class="detail-modal-overlay" @click="closeDetailModal">
     <div class="detail-modal" @click.stop>
@@ -592,7 +627,27 @@ onMounted(() => {
         <button class="close-btn" @click="closeDetailModal">&times;</button>
       </div>
       <div class="detail-modal-body">
-        <textarea readonly class="detail-textarea">{{ detailContent }}</textarea>
+        <textarea readonly class="detail-textarea" :value="detailContent"></textarea>
+      </div>
+    </div>
+  </div>
+  
+  <div v-if="showImageModal" class="image-modal-overlay" @click="closeImageModal">
+    <div class="image-modal" @click.stop>
+      <div class="image-modal-header">
+        <h3>图片预览</h3>
+        <button class="close-btn" @click="closeImageModal">&times;</button>
+      </div>
+      <div class="image-modal-body">
+        <div v-if="previewImages.length > 0" class="image-preview">
+          <button class="nav-btn prev-btn" @click="prevImage" :disabled="currentImageIndex === 0">‹</button>
+          <img :src="previewImages[currentImageIndex]" :alt="`图片 ${currentImageIndex + 1}`" />
+          <button class="nav-btn next-btn" @click="nextImage" :disabled="currentImageIndex === previewImages.length - 1">›</button>
+          <div class="image-indicator">{{ currentImageIndex + 1 }} / {{ previewImages.length }}</div>
+        </div>
+        <div v-else class="no-image">
+          暂无图片
+        </div>
       </div>
     </div>
   </div>
@@ -838,5 +893,118 @@ onMounted(() => {
 
 .item-detail-footer .close-btn:hover {
   background: #2563eb;
+}
+
+.image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.image-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 800px;
+  max-width: 90%;
+  max-height: 80vh;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+
+.image-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.image-modal-header .close-btn {
+  color: #fff;
+}
+
+.image-modal-body {
+  padding: 20px;
+}
+
+.image-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #fff;
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.prev-btn {
+  left: 10px;
+}
+
+.next-btn {
+  right: 10px;
+}
+
+.image-indicator {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.no-image {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+  font-size: 14px;
 }
 </style>

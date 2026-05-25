@@ -1,3 +1,4 @@
+<!-- 报修列表 -->
 <script setup>
 import { ref } from 'vue';
 const showModeMenu = ref(false);
@@ -43,10 +44,6 @@ function handleItemClick(repair) {
   emit('itemDoubleClick', repair);
 }
 
-function handleRefresh() {
-  emit('refresh');
-}
-
 function handleAdd() {
   emit('add');
 }
@@ -56,7 +53,7 @@ function handleModeSwitch(mode) {
   showModeMenu.value = false;
 }
 
-function handleDoubleClick() {
+function handleExpandClick() {
   emit('update:expanded', !props.expanded);
 }
 
@@ -78,8 +75,6 @@ watch(filterStatus, () => {
   <div 
     class="list-panel repair-list" 
     :class="{ expanded: expanded }"
-    title="双击展开/收起详情"
-    @dblclick="handleDoubleClick"
     @contextmenu="handleContextMenu"
   >
     <div class="repair-list-header">
@@ -100,7 +95,23 @@ watch(filterStatus, () => {
       </div>
     </div>
     
-    <div class="list-tip">双击黄色区域展开详细列表（{{ repairs.length }}/{{ repairs.length }}）</div>
+    <div class="list-tip">点击箭头展开详细列表</div>
+    
+    <!-- 优先级图例 -->
+    <div class="priority-legend">
+      <span class="legend-item">
+        <span class="legend-dot priority-high"></span>
+        高优先级
+      </span>
+      <span class="legend-item">
+        <span class="legend-dot priority-medium"></span>
+        中优先级
+      </span>
+      <span class="legend-item">
+        <span class="legend-dot priority-low"></span>
+        低优先级
+      </span>
+    </div>
     
     <div class="filter-tabs">
       <button 
@@ -143,14 +154,71 @@ watch(filterStatus, () => {
         <p>暂无报修记录</p>
       </div>
     </div>
+    
+    <button class="expand-arrow" @click="handleExpandClick" :title="expanded ? '收起详情' : '展开详情'">
+      {{ expanded ? '◀' : '▶' }}
+    </button>
   </div>
 </template>
 
 <style scoped>
 .repair-list {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.repair-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.repair-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.repair-items::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.repair-items::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #888 0%, #666 100%);
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.repair-items::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+}
+
+.expand-arrow {
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 64px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.expand-arrow:hover {
+  background: #f5f5f5;
+  color: #333;
 }
 
 .repair-list-header {
@@ -406,6 +474,41 @@ watch(filterStatus, () => {
   color: #999;
   padding: 4px 16px;
   text-align: center;
+}
+
+.priority-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #666;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.priority-high {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.legend-dot.priority-medium {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+
+.legend-dot.priority-low {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
 .mode-switch {

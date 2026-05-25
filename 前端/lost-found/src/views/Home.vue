@@ -1,3 +1,4 @@
+<!-- 主页 -->
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -25,7 +26,6 @@ const showMenu = ref(false);
 const showBuildings = ref(true);
 const listExpanded = ref(false);
 const filterStatus = ref("all");
-const isDoubleClick = ref(false);
 let clickTimer = null;
 
 const markers = ref([]);
@@ -38,11 +38,14 @@ const mapRef = ref(null);
 const showPublishModal = ref(false);
 const categories = ref([]);
 
+console.log('[Home.vue] categories initialized:', categories.value);
+
 const showDetailModal = ref(false);
 const showSearchModal = ref(false);
 const searchResults = ref([]);
 const avatarUrl = ref("");
 const username = ref("");
+const currentUserId = ref(localStorage.getItem("user_id"));
 
 const showRepairModal = ref(false);
 const repairLng = ref(0);
@@ -56,25 +59,63 @@ const mapMode = ref('view'); // 'view' | 'publish'
 
 const showMarkerSelector = ref(false);
 const nearbyMarkersList = ref([]);
-const selectorPosition = ref({ lng: 0, lat: 0 });
-const pubCategory = ref(1);
 
-const campuses = ref([
-  { id: 'cuit', name: '成都信息工程大学', center: [103.956, 30.572], zoom: 16 },
-  { id: 'cuit-longquanyi', name: '成信大(龙泉校区)', center: [104.208, 30.598], zoom: 16 },
-  { id: 'scu', name: '四川大学', center: [104.066, 30.578], zoom: 15 },
-  { id: 'uestc', name: '电子科技大学', center: [104.062, 30.653], zoom: 15 },
-  { id: 'cdut', name: '成都理工大学', center: [104.152, 30.628], zoom: 15 }
-]);
+const campuses = ref([]);
 
-const currentCampus = ref(campuses.value[0]);
+const currentCampus = ref(null);
+const currentCampusId = ref('');
+
+async function loadCampuses() {
+  try {
+    const res = await fetch(`${API_BASE}/map/campuses`);
+    const data = await res.json();
+    if (data.success && data.data) {
+      campuses.value = data.data;
+      if (campuses.value.length > 0) {
+        if (!currentCampus.value) {
+          currentCampus.value = campuses.value[0];
+        }
+        currentCampusId.value = currentCampus.value.id;
+      }
+    }
+  } catch (e) {
+    console.error("加载校区列表失败:", e);
+    campuses.value = [
+      { id: 'campus_1', name: '成都信息工程大学（航空港校区）', center: [103.9885, 30.5815], zoom: 19 }
+    ];
+    if (!currentCampus.value) {
+      currentCampus.value = campuses.value[0];
+    }
+    currentCampusId.value = currentCampus.value.id;
+  }
+}
+
+function handleCampusChange() {
+  console.log('[handleCampusChange] 校区ID:', currentCampusId.value);
+  const campus = campuses.value.find(c => c.id === currentCampusId.value);
+  if (campus) {
+    switchCampus(campus);
+  } else {
+    console.error('[handleCampusChange] 未找到校区:', currentCampusId.value);
+  }
+}
 
 function switchCampus(campus) {
+  console.log('[switchCampus] 切换校区:', campus);
   currentCampus.value = campus;
-  if (window.map) {
-    window.map.setZoomAndCenter(campus.zoom, campus.center);
+  if (mapRef.value && window.AMap) {
+    console.log('[switchCampus] 设置地图中心:', campus.center, '缩放级别:', campus.zoom);
+    mapRef.value.setZoomAndCenter(campus.zoom, campus.center);
+  } else {
+    console.error('[switchCampus] 地图对象未初始化');
   }
-  loadMarkers();
+  renderMarkers();
+  renderRepairMarkers();
+}
+
+function isMarkerInCampusBounds(lng, lat, campus) {
+  // 暂时禁用边界过滤，确保所有标记都能显示
+  return true;
 }
 
 async function loadUserInfo() {
@@ -97,16 +138,22 @@ async function loadUserInfo() {
 
 async function loadCategories() {
   try {
-    const res = await fetch(`${API_BASE}/admin/categories`);
+    console.log("[DEBUG] 开始加载分类...");
+    const res = await fetch(`${API_BASE}/map/categories`);
+    console.log("[DEBUG] 分类API响应状态:", res.status);
     const data = await res.json();
-    if (data && Array.isArray(data)) {
-      categories.value = data;
-      if (categories.value.length > 0) {
-        pubCategory.value = categories.value[0].category_id;
-      }
+    console.log("[DEBUG] 分类API响应数据:", data);
+    if (data.success && data.data && Array.isArray(data.data)) {
+      categories.value = data.data;
+      console.log("[DEBUG] 加载到的分类:", categories.value);
+      console.log("[DEBUG] 分类数量:", categories.value.length);
+    } else {
+      categories.value = [];
+      console.log("[DEBUG] 未获取到分类数据");
     }
   } catch (e) {
     console.error("加载分类失败:", e);
+    categories.value = [];
   }
 }
 
@@ -129,8 +176,6 @@ const filteredMarkers = computed(() => {
   const statusValue = filterStatus.value === "lost" ? 0 : 1;
   return markers.value.filter(m => m.status === statusValue);
 });
-
-const isMapClickAdd = computed(() => pendingWorldPoint.value !== null);
 
 function setStatus(message) {
   statusText.value = message;
@@ -171,13 +216,28 @@ function renderMarkers() {
   }
 
   markersToRender.forEach((m) => {
-    if (!m.lng || !m.lat || isNaN(m.lng) || isNaN(m.lat)) return;
+    console.log(`[DEBUG] Processing lost item marker: id=${m.id}, title=${m.title}, lng=${m.lng}, lat=${m.lat}`);
+    console.log(`[DEBUG] lng type: ${typeof m.lng}, lat type: ${typeof m.lat}`);
+    console.log(`[DEBUG] lng isFinite: ${Number.isFinite(m.lng)}, lat isFinite: ${Number.isFinite(m.lat)}`);
+    
+    if (!m.lng || !m.lat || isNaN(m.lng) || isNaN(m.lat) || !Number.isFinite(m.lng) || !Number.isFinite(m.lat)) {
+      console.log(`[DEBUG] 跳过无效坐标的标记: ${m.title}, lng=${m.lng}, lat=${m.lat}`);
+      return;
+    }
+    
+    if (!isMarkerInCampusBounds(m.lng, m.lat, currentCampus.value)) {
+      console.log(`[DEBUG] 标记 ${m.title} 不在当前校区范围内，跳过渲染`);
+      return;
+    }
 
-    const isLost = m.status === 0;
+    const isLost = m.type === 0;
     const markerColor = isLost ? "marker-lost" : "marker-found";
+    
+    const position = [Number(m.lng), Number(m.lat)];
+    console.log(`[DEBUG] Creating marker with position:`, position);
 
     const marker = new window.AMap.Marker({
-      position: [m.lng, m.lat],
+      position: position,
       map: mapRef.value,
       title: m.title,
       offset: new window.AMap.Pixel(-17, -48),
@@ -239,12 +299,17 @@ async function loadMarkers() {
           }
         }
       }
+      const lngValue = item.lng !== undefined ? item.lng : item.longitude;
+      const latValue = item.lat !== undefined ? item.lat : item.latitude;
+      const lngNum = lngValue !== undefined ? Number(lngValue) : null;
+      const latNum = latValue !== undefined ? Number(latValue) : null;
+      
       return {
         id: item.item_id || item.location_id || index + 1,
         title: item.title || item.name || "未命名标记",
         detail: item.description || "",
-        lng: item.lng || item.longitude ? Number(item.lng ?? item.longitude) : null,
-        lat: item.lat ?? item.latitude ? Number(item.lat ?? item.latitude) : null,
+        lng: Number.isFinite(lngNum) ? lngNum : null,
+        lat: Number.isFinite(latNum) ? latNum : null,
         time: item.create_time || "",
         status: item.status ?? 0,
         phone: item.phone || "",
@@ -301,8 +366,12 @@ async function loadRepairMarkers() {
     }
 
     repairMarkers.value = (data.data || []).map((item) => {
-      const lng = item.lng ? Number(item.lng) : null;
-      const lat = item.lat ? Number(item.lat) : null;
+      const lngValue = item.lng !== undefined ? item.lng : item.longitude;
+      const latValue = item.lat !== undefined ? item.lat : item.latitude;
+      const lngNum = lngValue !== undefined ? Number(lngValue) : null;
+      const latNum = latValue !== undefined ? Number(latValue) : null;
+      const lng = Number.isFinite(lngNum) ? lngNum : null;
+      const lat = Number.isFinite(latNum) ? latNum : null;
       console.log(`[DEBUG] Repair item: ${item.title}, lng=${lng}, lat=${lat}`);
       return ({
         id: item.repair_id,
@@ -362,24 +431,64 @@ function renderRepairMarkers() {
 
   let renderedCount = 0;
   markersToRender.forEach((m) => {
-    console.log(`[DEBUG] Processing marker: ${m.title}, lng=${m.lng}, lat=${m.lat}`);
-    if (!m.lng || !m.lat || isNaN(m.lng) || isNaN(m.lat)) {
+    console.log(`[DEBUG] Processing marker: ${m.title}, lng=${m.lng}, lat=${m.lat}, priority=${m.priority}`);
+    if (!m.lng || !m.lat || isNaN(m.lng) || isNaN(m.lat) || !Number.isFinite(m.lng) || !Number.isFinite(m.lat)) {
       console.log(`[DEBUG] Skipping marker: invalid coordinates`);
       return;
     }
+    
+    if (!isMarkerInCampusBounds(m.lng, m.lat, currentCampus.value)) {
+      console.log(`[DEBUG] 报修标记 ${m.title} 不在当前校区范围内，跳过渲染`);
+      return;
+    }
+
+    // 根据优先级确定颜色
+    const priority = parseInt(m.priority);
+    let color = '#28a745'; // 默认绿色
+    
+    if (priority === 3) {
+      color = '#dc3545'; // 红色
+    } else if (priority === 2) {
+      color = '#ffc107'; // 黄色
+    }
+
+    const svgContent = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
+        <defs>
+          <radialGradient id="coreGrad${m.repair_id}" cx="30%" cy="30%">
+            <stop offset="0%" style="stop-color:${color};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${color};stop-opacity:0.8" />
+          </radialGradient>
+        </defs>
+        <circle cx="30" cy="30" r="22" fill="none" stroke="${color}" stroke-width="3" opacity="0.4">
+          <animate attributeName="r" from="15" to="25" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from="1" to="0" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="30" cy="30" r="15" fill="url(#coreGrad${m.repair_id})" stroke="#fff" stroke-width="3"/>
+        <text x="30" y="35" text-anchor="middle" font-size="16" fill="#fff">🔧</text>
+      </svg>
+    `;
+
+    const iconBase64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgContent)));
+    
+    const icon = new window.AMap.Icon({
+      size: new window.AMap.Size(60, 60),
+      image: iconBase64,
+      imageSize: new window.AMap.Size(60, 60),
+      imageOffset: new window.AMap.Pixel(0, 0)
+    });
 
     const marker = new window.AMap.Marker({
       position: [m.lng, m.lat],
       map: mapRef.value,
       title: m.title,
-      offset: new window.AMap.Pixel(-17, -48),
-      content: `
-        <div class="marker-wrap marker-repair">
-          <div class="marker-wave repair-wave"></div>
-          <div class="marker-core repair-core"></div>
-          <div class="marker-label">${m.title || "报修"}</div>
-        </div>
-      `,
+      icon: icon,
+      offset: new window.AMap.Pixel(-30, -50),
+      label: {
+        content: `<span style="font-size:12px;color:#333;text-align:center;display:block;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.title || "报修"}</span>`,
+        offset: new window.AMap.Pixel(-30, -45),
+        direction: 'top'
+      }
     });
 
     marker.on('click', function() {
@@ -401,14 +510,9 @@ function renderRepairMarkers() {
   console.log(`[DEBUG] Rendered ${renderedCount} repair markers`);
 }
 
-function handleSubmitRepair(data) {
+function handleSubmitRepair() {
   showRepairModal.value = false;
   loadRepairMarkers();
-}
-
-function handleRepairDoubleClick(repair) {
-  centerToPoint(repair.lng, repair.lat);
-  showRepairDetail(repair);
 }
 
 function showRepairDetail(repair) {
@@ -425,18 +529,62 @@ function openRepairModal(e) {
 }
 
 function initMap(config) {
+  console.log('[initMap] 开始初始化地图');
+  console.log('[initMap] 配置:', config);
+  
   const AMap = window.AMap;
+  console.log('[initMap] AMap SDK 是否加载:', !!AMap);
+  
+  const mapContainer = document.getElementById(mapContainerId);
+  console.log('[initMap] 地图容器:', mapContainer);
+  console.log('[initMap] 容器尺寸:', mapContainer ? { width: mapContainer.offsetWidth, height: mapContainer.offsetHeight } : '不存在');
+  
+  if (!mapContainer) {
+    console.error('[initMap] 错误：地图容器不存在');
+    setStatus("地图容器初始化失败");
+    return;
+  }
+  
+  if (!AMap) {
+    console.error('[initMap] 错误：AMap SDK 未加载');
+    setStatus("地图SDK加载失败");
+    return;
+  }
+  
+  if (!config || !config.center_lng || !config.center_lat) {
+    console.error('[initMap] 错误：地图配置不完整');
+    setStatus("地图配置加载失败");
+    return;
+  }
 
-  mapRef.value = new AMap.Map(mapContainerId, {
-    zoom: config.zoom || 18,
-    center: [config.center_lng, config.center_lat],
-    viewMode: "3D",
-    pitch: 45,
-    showIndoorMap: false,
-    highAccuracy: true,
-    animateEnable: true,
-    resizeEnable: true,
-  });
+  try {
+    const initialViewMode = is3D.value ? "3D" : "2D";
+    const initialPitch = is3D.value ? 45 : 0;
+    
+    mapRef.value = new AMap.Map(mapContainerId, {
+      zoom: config.zoom || 18,
+      center: [parseFloat(config.center_lng), parseFloat(config.center_lat)],
+      viewMode: initialViewMode,
+      pitch: initialPitch,
+      showIndoorMap: false,
+      highAccuracy: true,
+      animateEnable: true,
+      resizeEnable: true,
+    });
+    console.log('[initMap] 地图创建成功:', mapRef.value);
+    
+    // 如果3D模式开启，添加建筑层
+    if (is3D.value && showBuildings.value) {
+      mapRef.value.addLayer(new AMap.Buildings({
+        heightFactor: 1.5,
+        shadow: true
+      }));
+    }
+  } catch (e) {
+    console.error('[initMap] 地图创建失败:', e);
+    setStatus("地图创建失败: " + e.message);
+    return;
+  }
 
   mapRef.value.setBounds(new AMap.Bounds(
     [config.sw_lng, config.sw_lat],
@@ -447,7 +595,7 @@ function initMap(config) {
   mapRef.value.on("click", function(e) {
     if (e && e.lnglat) {
       const lng = parseFloat(e.lnglat.lng.toFixed(8));
-      const lat = parseFloat(e.lat.toFixed(8));
+      const lat = parseFloat(e.lnglat.lat.toFixed(8));
       
       if (mapMode.value === 'view') {
         const nearbyMarkers = findNearbyMarkers(lng, lat);
@@ -470,13 +618,6 @@ function initMap(config) {
       }
     }
   });
-}
-
-function toggleMode() {
-  currentMode.value = currentMode.value === 'lost' ? 'repair' : 'lost';
-  updateStatusText();
-  renderMarkers();
-  renderRepairMarkers();
 }
 
 function toggleMapMode() {
@@ -537,24 +678,31 @@ function closeMarkerSelector() {
 }
 
 async function loadDefaultMap() {
+  console.log('[loadDefaultMap] 开始加载地图配置');
   try {
+    console.log('[loadDefaultMap] 请求地址:', `${API_BASE}/map/default`);
     const res = await fetch(`${API_BASE}/map/default`);
+    console.log('[loadDefaultMap] 响应状态:', res.status);
     const config = await res.json();
+    console.log('[loadDefaultMap] 配置数据:', config);
+    
     if (!config || config.error) {
+      console.error('[loadDefaultMap] 配置错误:', config);
       setStatus("地图加载失败");
       return;
     }
     initMap(config);
   } catch (error) {
-    console.error(error);
-    setStatus("地图接口异常");
+    console.error('[loadDefaultMap] 请求失败:', error);
+    setStatus("地图接口异常: " + error.message);
   }
 }
 
 function handleModeSwitch(mode) {
   if (currentMode.value === mode) return;
   
-  if (mapRef.value) {
+  if (mapRef.value && window.AMap) {
+    const AMap = window.AMap;
     const allOverlays = mapRef.value.getAllOverlays();
     allOverlays.forEach(overlay => {
       if (overlay instanceof AMap.Marker) {
@@ -579,7 +727,7 @@ async function openAddModal() {
   showPublishModal.value = true;
 }
 
-function handlePublishSubmit(data) {
+function handlePublishSubmit() {
   setStatus("发布成功");
   pendingWorldPoint.value = null;
   loadMarkers();
@@ -803,6 +951,7 @@ watch(filterStatus, () => {
 });
 
 onMounted(async () => {
+  await loadCampuses();
   await loadDefaultMap();
   await loadMarkers();
   await loadRepairMarkers();
@@ -858,23 +1007,7 @@ onMounted(async () => {
         @add="openRepairModal"
       />
 
-      <button
-        class="side-toggle"
-        :style="leftArrowStyle"
-        :class="{ hidden: mode === 'fullmap' }"
-        title="切入全图模式"
-        @click="enterFullMap"
-      >
-        ◀
-      </button>
-      <button
-        class="side-toggle right-mode"
-        :class="{ hidden: mode !== 'fullmap' }"
-        title="返回分栏模式"
-        @click="backToSplit"
-      >
-        ▶
-      </button>
+
 
       <section class="map-panel">
         <div :id="mapContainerId"></div>
@@ -883,8 +1016,8 @@ onMounted(async () => {
             position: 'absolute',
             top: '0',
             left: '0',
-            width: '200px',
-            height: '350px',
+            width: showMenu ? '200px' : '320px',
+            height: showMenu ? '350px' : '44px',
             zIndex: '99',
             background: 'transparent',
           }"
@@ -900,8 +1033,8 @@ onMounted(async () => {
           }"
         >
           <select
-            v-model="currentCampus"
-            @change="switchCampus(currentCampus)"
+            v-model="currentCampusId"
+            @change="handleCampusChange"
             :style="{
               padding: '6px 12px',
               borderRadius: '6px',
@@ -914,7 +1047,7 @@ onMounted(async () => {
               marginRight: '8px'
             }"
           >
-            <option v-for="campus in campuses" :key="campus.id" :value="campus">
+            <option v-for="campus in campuses" :key="campus.id" :value="campus.id">
               {{ campus.name }}
             </option>
           </select>
@@ -1030,6 +1163,26 @@ onMounted(async () => {
             </button>
             <hr :style="{ borderColor: '#374151', margin: '4px 0' }" />
             <button
+              :style="{
+                width: '100%',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                border: 'none',
+                background: 'transparent',
+                color: '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }"
+              @click="mode === 'fullmap' ? backToSplit() : enterFullMap(); closeMenu()"
+            >
+              {{ mode === 'fullmap' ? '📊 分栏模式' : '🗺️ 全图模式' }}
+            </button>
+            <hr :style="{ borderColor: '#374151', margin: '4px 0' }" />
+            <button
             :style="{
               width: '100%',
               padding: '8px 12px',
@@ -1055,45 +1208,61 @@ onMounted(async () => {
       <div
         :style="{
           position: 'absolute',
-          top: '12px',
-          right: '12px',
+          top: '-10px',
+          right: '-10px',
           zIndex: '100',
           display: 'flex',
-          gap: '8px'
+          gap: '8px',
+          padding: '30px',
+          pointerEvents: 'auto'
         }"
       >
-        <button
+        <div
           :style="{
-            padding: '8px 16px',
-            borderRadius: '6px',
-            border: 'none',
-            background: mapMode === 'view' ? '#3B82F6' : '#374151',
-            color: '#fff',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            transition: 'background 0.2s'
+            display: 'flex',
+            alignItems: 'center',
+            background: '#374151',
+            borderRadius: '8px',
+            padding: '2px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
           }"
-          @click="toggleMapMode"
         >
-          👁 查看模式
-        </button>
-        <button
-          :style="{
-            padding: '8px 16px',
-            borderRadius: '6px',
-            border: 'none',
-            background: mapMode === 'publish' ? '#10B981' : '#374151',
-            color: '#fff',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            transition: 'background 0.2s'
-          }"
-          @click="toggleMapMode"
-        >
-          ✏️ 发布模式
-        </button>
+          <button
+            :style="{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              background: mapMode === 'view' ? '#3B82F6' : 'transparent',
+              color: mapMode === 'view' ? '#fff' : '#9CA3AF',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: mapMode === 'view' ? '700' : '500',
+              transition: 'all 0.3s ease',
+              transform: mapMode === 'view' ? 'scale(1.05)' : 'scale(1)'
+            }"
+            @click="toggleMapMode"
+          >
+            查看
+          </button>
+          <span :style="{ color: '#6B7280', margin: '0 4px', fontSize: '16px' }">|</span>
+          <button
+            :style="{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              background: mapMode === 'publish' ? '#10B981' : 'transparent',
+              color: mapMode === 'publish' ? '#fff' : '#9CA3AF',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: mapMode === 'publish' ? '700' : '500',
+              transition: 'all 0.3s ease',
+              transform: mapMode === 'publish' ? 'scale(1.05)' : 'scale(1)'
+            }"
+            @click="toggleMapMode"
+          >
+            发布
+          </button>
+        </div>
       </div>
     </section>
   </main>
@@ -1101,7 +1270,6 @@ onMounted(async () => {
     <PublishModal
       :show="showPublishModal"
       :pendingLocation="pendingWorldPoint"
-      :categories="categories"
       @close="handlePublishClose"
       @submit="handlePublishSubmit"
       @clearLocation="handleClearLocation"
@@ -1119,6 +1287,7 @@ onMounted(async () => {
     <MarkerDetailModal
       :show="showDetailModal"
       :marker="selectedMarker"
+      :show-publisher-info="true"
       @close="showDetailModal = false"
       @remove="handleRemoveMarker"
       @locate="(m) => { highlightId = m.id; centerToPoint(m.lng, m.lat); renderMarkers(); }"
@@ -1158,7 +1327,7 @@ onMounted(async () => {
               @click="selectMarkerFromList(marker)"
             >
               <div class="marker-icon">
-                {{ currentMode === 'lost' ? (marker.status === 0 ? '🔴' : '🟢') : '🔧' }}
+                {{ currentMode === 'lost' ? (marker.type === 0 ? '🔴' : '🟢') : '🔧' }}
               </div>
               <div class="marker-info">
                 <div class="marker-title">{{ marker.title }}</div>
@@ -1173,6 +1342,57 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.notification-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.08);
+}
+
+.notification-btn:active {
+  transform: scale(0.95);
+}
+
+.avatar-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.avatar-btn:hover {
+  transform: scale(1.08);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .marker-wrap.marker-repair {
   position: relative;
   display: flex;
@@ -1225,6 +1445,33 @@ onMounted(async () => {
     transform: translate(-50%, -50%) scale(2);
     opacity: 0;
   }
+}
+
+/* 报修标记 - 高优先级 (红色) */
+.marker-repair .repair-core.priority-high {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5) !important;
+}
+.marker-repair .repair-wave.priority-high {
+  background: rgba(220, 53, 69, 0.4);
+}
+
+/* 报修标记 - 中优先级 (黄色) */
+.marker-repair .repair-core.priority-medium {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5) !important;
+}
+.marker-repair .repair-wave.priority-medium {
+  background: rgba(255, 193, 7, 0.4);
+}
+
+/* 报修标记 - 低优先级 (绿色) */
+.marker-repair .repair-core.priority-low {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.5) !important;
+}
+.marker-repair .repair-wave.priority-low {
+  background: rgba(40, 167, 69, 0.4);
 }
 
 .modal-overlay {

@@ -1,5 +1,8 @@
+<!-- 报修弹窗 -->
 <script setup>
 import { ref, onMounted, watch } from "vue";
+
+const showToast = window.showToast;
 
 const props = defineProps({
   visible: Boolean,
@@ -8,8 +11,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "submit"]);
-
-const API_BASE = 'http://127.0.0.1:5000/api';
 
 const title = ref("");
 const description = ref("");
@@ -135,17 +136,17 @@ async function handleSubmit(event) {
   const repairDescription = description.value.trim();
 
   if (!repairTitle) {
-    alert("请填写维修物品");
+    showToast("请填写维修物品", "warning");
     return;
   }
 
   if (!repairDescription) {
-    alert("请填写问题描述");
+    showToast("请填写问题描述", "warning");
     return;
   }
 
   if (!lng.value || !lat.value) {
-    alert("请先在地图上选择位置");
+    showToast("请先在地图上选择位置", "warning");
     return;
   }
 
@@ -173,16 +174,16 @@ async function handleSubmit(event) {
     const result = await res.json();
     
     if (result.success) {
-      alert("报修提交成功！");
+      showToast("报修提交成功！", "success");
       emit("submit", result);
       handleClose();
       return;
     } else {
-      alert("提交失败: " + (result.message || '未知错误'));
+      showToast("提交失败: " + (result.message || '未知错误'), "error");
     }
   } catch (error) {
     console.error("提交报修失败:", error);
-    alert("提交失败，请稍后重试");
+    showToast("提交失败，请稍后重试", "error");
   } finally {
     isSubmitting.value = false;
   }

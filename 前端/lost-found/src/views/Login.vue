@@ -1,12 +1,18 @@
+<!-- 登录页面 -->
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import AppTopBar from "../components/AppTopBar.vue";
 
 const router = useRouter();
+const showToast = window.showToast;
 const mode = ref("login");
-const username = ref("");
-const email = ref("");
+const loginInput = ref("");
 const password = ref("");
+const confirmPassword = ref("");
+const regUsername = ref("");
+const regEmail = ref("");
+const regPassword = ref("");
 const adminUsername = ref("");
 const adminPassword = ref("");
 const captcha = ref("");
@@ -39,65 +45,20 @@ function switchToAdmin() {
   mode.value = "admin";
 }
 
-function showToast(message) {
-  const existingToast = document.querySelector('.login-toast');
-  if (existingToast) {
-    existingToast.remove();
-  }
-  
-  const toast = document.createElement('div');
-  toast.className = 'login-toast';
-  toast.textContent = message;
-  toast.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: #fff;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-size: 16px;
-    z-index: 9999;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    animation: toastFadeIn 0.3s ease;
-  `;
-  
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = `
-    @keyframes toastFadeIn {
-      from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-    @keyframes toastFadeOut {
-      from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      to { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-    }
-    .login-toast.fade-out {
-      animation: toastFadeOut 0.3s ease forwards;
-    }
-  `;
-  document.head.appendChild(styleSheet);
-  
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.add('fade-out');
-    setTimeout(() => {
-      toast.remove();
-      styleSheet.remove();
-    }, 300);
-  }, 1500);
+function goToResetPassword() {
+  router.push("/security?from=login#password");
 }
 
 async function submit() {
-  const emailVal = email.value.trim();
+  const loginInputVal = loginInput.value.trim();
   const passwordVal = password.value.trim();
-  const usernameVal = username.value.trim();
   const captchaVal = captcha.value.trim();
+  const regUsernameVal = regUsername.value.trim();
+  const regEmailVal = regEmail.value.trim();
+  const regPasswordVal = regPassword.value.trim();
 
   if (mode.value === "login") {
-    if (!emailVal || !passwordVal) {
+    if (!loginInputVal || !passwordVal) {
       showToast("请输入完整信息", 'warning');
       return;
     }
@@ -109,18 +70,27 @@ async function submit() {
       return;
     }
   } else {
-    if (!usernameVal || !emailVal || !passwordVal) {
+    if (!regUsernameVal || !regEmailVal || !regPasswordVal || !confirmPassword.value.trim()) {
       showToast("请输入完整信息", 'warning');
+      return;
+    }
+    
+    if (regPasswordVal !== confirmPassword.value.trim()) {
+      showToast("两次输入的密码不一致", 'error');
       return;
     }
   }
 
   try {
     if (mode.value === "login") {
+      const isEmail = loginInputVal.includes('@');
       const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailVal, password: passwordVal }),
+        body: JSON.stringify({ 
+          [isEmail ? 'email' : 'username']: loginInputVal, 
+          password: passwordVal 
+        }),
       });
 
       const data = await res.json();
@@ -129,10 +99,10 @@ async function submit() {
         localStorage.setItem("user_id", data.user.user_id);
         localStorage.setItem("username", data.user.username);
         localStorage.setItem("email", data.user.email);
-        showToast("登录成功");
+        showToast("登录成功", "success");
         setTimeout(() => router.push("/home"), 1000);
       } else {
-        showToast(data.message || "登录失败");
+        showToast(data.message || "登录失败", "error");
       }
       return;
     }
@@ -141,21 +111,21 @@ async function submit() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: usernameVal,
-        email: emailVal,
-        password: passwordVal,
+        username: regUsernameVal,
+        email: regEmailVal,
+        password: regPasswordVal,
       }),
     });
     const data = await res.json();
     if (res.status === 201) {
-      showToast("注册成功，请登录");
+      showToast("注册成功，请登录", "success");
       setTimeout(() => switchToLogin(), 1000);
     } else {
-      showToast(data.message || "注册失败");
+      showToast(data.message || "注册失败", "error");
     }
   } catch (err) {
     console.error(err);
-    showToast("服务器连接失败");
+    showToast("服务器连接失败", "error");
   }
 }
 
@@ -178,23 +148,37 @@ async function submitAdmin() {
       localStorage.removeItem("username");
       localStorage.removeItem("email");
       localStorage.setItem("is_admin", "1");
-      showToast("管理员登录成功");
+      showToast("管理员登录成功", "success");
       setTimeout(() => router.push("/admin"), 1000);
     } else {
-      showToast(data.message || "管理员登录失败");
+      showToast(data.message || "管理员登录失败", "error");
     }
   } catch (err) {
     console.error(err);
-    showToast("服务器连接失败");
+    showToast("服务器连接失败", "error");
   }
 }
 </script>
 
 <template>
   <div class="login-page">
+    <div class="video-background">
+      <video autoplay muted loop class="background-video">
+        <source src="/登录背景.mp4" type="video/mp4">
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+    
+    <AppTopBar variant="home">
+      <template #actions>
+        <button class="nav-link-btn" @click="router.push('/home')">首页</button>
+        <button class="nav-link-btn" @click="router.push('/about')">关于我们</button>
+      </template>
+    </AppTopBar>
+    
     <div class="login-container">
       <div class="login-card">
-        <h2 class="login-title">欢迎登录</h2>
+        <h2 class="login-title">欢迎</h2>
 
         <div class="tabs">
           <button :class="{ active: mode === 'login' }" type="button" @click="switchToLogin">登录</button>
@@ -206,23 +190,27 @@ async function submitAdmin() {
           <div v-show="mode === 'register'" class="form-group">
             <label class="form-label">用户名</label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input v-model="username" type="text" placeholder="请输入用户名（2-20个字符）" />
+              <input v-model="regUsername" type="text" placeholder="请输入用户名（2-20个字符）" />
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">用户名</label>
+          <div v-show="mode === 'register'" class="form-group">
+            <label class="form-label">邮箱</label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input v-model="email" type="text" placeholder="请输入用户名（2-20个字符）" />
+              <input v-model="regEmail" type="email" placeholder="请输入邮箱地址" />
             </div>
           </div>
 
           <div class="form-group">
+            <label class="form-label">账号</label>
+            <div class="input-wrapper">
+              <input v-model="loginInput" type="text" placeholder="邮箱或用户名（含@为邮箱）" />
+            </div>
+          </div>
+
+          <div v-show="mode === 'login'" class="form-group">
             <label class="form-label">密码</label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
               <input 
                 v-model="password" 
                 :type="showPassword ? 'text' : 'password'" 
@@ -234,12 +222,39 @@ async function submitAdmin() {
             </div>
           </div>
 
+          <div v-show="mode === 'register'" class="form-group">
+            <label class="form-label">密码</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="regPassword" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="请输入密码（8-32个字符）" 
+              />
+              <button class="password-toggle" @click="showPassword = !showPassword">
+                {{ showPassword ? '🙈' : '👁' }}
+              </button>
+            </div>
+          </div>
+
+          <div v-show="mode === 'register'" class="form-group">
+            <label class="form-label">确认密码</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="confirmPassword" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="请再次输入密码" 
+              />
+              <button class="password-toggle" @click="showPassword = !showPassword">
+                {{ showPassword ? '🙈' : '👁' }}
+              </button>
+            </div>
+          </div>
+
           <div v-show="mode === 'login'" class="form-group captcha-group">
-            <label class="form-label">人机验证码</label>
+            <label class="form-label">人机验证</label>
             <div class="captcha-wrapper">
-              <div class="input-wrapper captcha-input">
-                <span class="input-icon">🛡</span>
-                <input v-model="captcha" type="text" placeholder="请输入右侧验证码" maxlength="5" />
+              <div class="captcha-input-wrapper">
+                <input v-model="captcha" type="text" placeholder="请输入验证码" maxlength="5" />
               </div>
               <div class="captcha-code" @click="refreshCaptcha">
                 {{ captchaCode }}
@@ -250,13 +265,17 @@ async function submitAdmin() {
           <button class="login-btn" type="button" @click="submit">
             {{ mode === "login" ? "登录" : "注册" }}
           </button>
+
+          <div v-show="mode === 'login'" class="forgot-password">
+            <span>忘记密码？</span>
+            <button class="forgot-btn" @click="goToResetPassword">点击修改</button>
+          </div>
         </div>
 
         <div v-show="mode === 'admin'" class="form-container">
           <div class="form-group">
             <label class="form-label">管理员用户名</label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
               <input v-model="adminUsername" type="text" placeholder="请输入管理员用户名" />
             </div>
           </div>
@@ -264,7 +283,6 @@ async function submitAdmin() {
           <div class="form-group">
             <label class="form-label">管理员密码</label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
               <input 
                 v-model="adminPassword" 
                 :type="showPassword ? 'text' : 'password'" 
@@ -291,29 +309,75 @@ async function submitAdmin() {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1b2a 100%);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.background-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.nav-link-btn {
+  text-decoration: none;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-link-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .login-container {
+  flex: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 520px;
+  margin: auto;
+  padding: 40px 20px;
 }
 
 .login-card {
-  background: rgba(15, 23, 42, 0.95);
+  background: #ffffff;
   border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4),
-              0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 45px 50px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15),
+              0 10px 30px rgba(0, 0, 0, 0.1),
+              0 2px 8px rgba(0, 0, 0, 0.06),
+              0 0 0 1px rgba(0, 0, 0, 0.04);
+  transform: perspective(1000px) rotateX(0deg);
 }
 
 .login-title {
   text-align: center;
-  color: #fff;
+  color: #1e293b;
   font-size: 28px;
   font-weight: 600;
   margin: 0 0 30px 0;
@@ -330,15 +394,15 @@ async function submitAdmin() {
   padding: 12px;
   border: none;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
+  background: #f1f5f9;
+  color: #64748b;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .tabs button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
 }
 
 .tabs button.active {
@@ -354,14 +418,18 @@ async function submitAdmin() {
 
 .form-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
 }
 
 .form-label {
-  color: #94a3b8;
+  color: #475569;
   font-size: 14px;
   font-weight: 500;
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .input-wrapper {
@@ -370,32 +438,25 @@ async function submitAdmin() {
   align-items: center;
 }
 
-.input-icon {
-  position: absolute;
-  left: 15px;
-  font-size: 16px;
-  color: #64748b;
-}
-
 .input-wrapper input {
   width: 100%;
-  padding: 14px 15px 14px 45px;
-  border: none;
+  padding: 14px 15px;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #fff;
+  background: #ffffff;
+  color: #1e293b;
   font-size: 14px;
   outline: none;
   transition: all 0.3s ease;
 }
 
 .input-wrapper input:focus {
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .input-wrapper input::placeholder {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .password-toggle {
@@ -405,17 +466,16 @@ async function submitAdmin() {
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #64748b;
+  color: #94a3b8;
   transition: color 0.3s ease;
 }
 
 .password-toggle:hover {
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .captcha-group {
-  flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .captcha-wrapper {
@@ -424,32 +484,61 @@ async function submitAdmin() {
   width: 100%;
 }
 
-.captcha-input {
+.captcha-input-wrapper {
   flex: 1;
+  position: relative;
+}
+
+.captcha-input-wrapper input {
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.captcha-input-wrapper input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.captcha-input-wrapper input::placeholder {
+  color: #94a3b8;
 }
 
 .captcha-code {
-  padding: 14px 20px;
-  background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   border-radius: 12px;
-  color: #3b82f6;
-  font-size: 20px;
+  color: #2563eb;
+  font-size: 18px;
   font-weight: bold;
-  letter-spacing: 4px;
+  letter-spacing: 8px;
   cursor: pointer;
   user-select: none;
   transition: all 0.3s ease;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15),
+              0 2px 6px rgba(59, 130, 246, 0.1);
+  min-width: 110px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .captcha-code:hover {
-  border-color: rgba(59, 130, 246, 0.6);
-  transform: scale(1.02);
+  border-color: #93c5fd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25),
+              0 3px 8px rgba(59, 130, 246, 0.15);
 }
 
 .login-btn {
   padding: 16px;
-  border: 2px solid #3b82f6;
+  border: none;
   border-radius: 12px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
@@ -461,7 +550,33 @@ async function submitAdmin() {
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.forgot-password {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.forgot-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.forgot-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  text-decoration: underline;
 }
 
 .divider {
@@ -474,11 +589,11 @@ async function submitAdmin() {
 .divider-line {
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
 }
 
 .divider-text {
-  color: #64748b;
+  color: #94a3b8;
   font-size: 14px;
 }
 
@@ -494,18 +609,18 @@ async function submitAdmin() {
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
+  background: #ffffff;
+  color: #64748b;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .social-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .social-icon {
@@ -516,7 +631,7 @@ async function submitAdmin() {
   display: flex;
   justify-content: center;
   gap: 8px;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 14px;
 }
 
@@ -531,7 +646,7 @@ async function submitAdmin() {
 
 .agreement {
   text-align: center;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 12px;
 }
 
@@ -542,46 +657,5 @@ async function submitAdmin() {
 
 .agreement a:hover {
   text-decoration: underline;
-}
-
-.login-toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  padding: 16px 32px;
-  border-radius: 12px;
-  font-size: 16px;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-}
-
-.login-toast.fade-out {
-  animation: fadeOut 0.3s ease forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
 }
 </style>

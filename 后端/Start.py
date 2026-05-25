@@ -1,37 +1,49 @@
 from flask import Flask, send_from_directory
-from flask_cors import CORS
-from user.DenluZhuChe import auth_bp, Config
-from map.map_service import map_bp
-from user.GeRenZhongXin import profile_bp
-from admin.admin_api import admin_api_bp
-from map.repair_api import repair_bp
-from admin.message_service import message_bp
+from user.auth import auth_bp
+from user.config import Config, db
+from map.main import map_bp
+from user.profile import profile_bp
+from user.claim import claim_bp
+from admin.admin_api import register_admin_routes
+from message.main import message_bp
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = 'your_secret_key_123'
-CORS(app)
+
+try:
+    from flask_cors import CORS
+    CORS(app)
+    print("CORS enabled via flask-cors")
+except ImportError:
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    print("CORS enabled via middleware")
 
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(map_bp, url_prefix="/api")
 app.register_blueprint(profile_bp)
-app.register_blueprint(admin_api_bp, url_prefix='/api/admin')
-app.register_blueprint(repair_bp, url_prefix='/api')
+app.register_blueprint(claim_bp)
+register_admin_routes(app)
 app.register_blueprint(message_bp, url_prefix='/api')
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.dirname(BACKEND_ROOT)
 STATIC_FOLDER = os.path.join(BACKEND_ROOT, 'static')
-UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')
+IMAGES_FOLDER = os.path.join(BACKEND_ROOT, 'images')
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory(STATIC_FOLDER, filename)
 
-@app.route('/uploads/<path:filename>')
-def serve_uploads(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@app.route('/images/<path:filename>')
+def serve_images(filename):
+    return send_from_directory(IMAGES_FOLDER, filename)
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 VUE_ROOT = os.path.join(PROJECT_ROOT, '前端', 'lost-found')
@@ -49,8 +61,8 @@ def serve_favicon():
         return send_from_directory(VUE_DIST, 'favicon.ico')
     return send_from_directory(os.path.join(VUE_ROOT, 'public'), 'favicon.ico')
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/', defaults={'path': ''}, methods=['GET', 'HEAD', 'OPTIONS'])
+@app.route('/<path:path>', methods=['GET', 'HEAD', 'OPTIONS'])
 def serve_vue(path):
     if path.startswith('api/'):
         return {"message": "API Not Found"}, 404
@@ -67,7 +79,6 @@ def serve_vue(path):
     return {"message": "Vue front-end not built yet"}, 500
 
 with app.app_context():
-    from user.DenluZhuChe import db
     db.init_app(app)
 
 def run_initializations():

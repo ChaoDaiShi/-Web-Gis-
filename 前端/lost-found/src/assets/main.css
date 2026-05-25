@@ -12,3 +12,71 @@
 .vue-inspector__anchor {
   display: none !important;
 }
+
+/* 通用背景图片样式 */
+.profile-page {
+  position: relative;
+}
+
+.profile-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 0;
+}
+
+.profile-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 表单页面半透明样式 */
+.profile-page .container {
+  background: rgba(245, 245, 245, 0.15);
+}
+
+.profile-page .form-content {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.profile-page .form-header {
+  background: rgba(248, 249, 250, 0.6);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.profile-page .claim-form,
+.profile-page .return-form {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.profile-page .form-section {
+  background: rgba(248, 249, 250, 0.5);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.profile-page .form-group input,
+.profile-page .form-group textarea {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(221, 221, 221, 0.6);
+}
+
+.profile-page .item-preview {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(221, 221, 221, 0.6);
+}
+
+.profile-page .btn {
+  background: rgba(255, 255, 255, 0.7);
+}

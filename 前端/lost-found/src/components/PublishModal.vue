@@ -1,15 +1,14 @@
+<!-- 发布弹窗 -->
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
+
+const showToast = window.showToast;
 
 const props = defineProps({
   show: Boolean,
   pendingLocation: {
     type: Object,
     default: null
-  },
-  categories: {
-    type: Array,
-    default: () => []
   }
 });
 
@@ -22,11 +21,53 @@ const pubDetail = ref('');
 const pubPhone = ref('');
 const pubType = ref('lost');
 const pubImages = ref([]);
-const pubCategory = ref(1);
+const pubCategory = ref(null);
 const localPendingLocation = ref(null);
 const isSubmitting = ref(false);
+const isLoadingCategories = ref(true);
+const categories = ref([]);
 
 const imageInputRef = ref(null);
+
+const hasCategories = computed(() => {
+  return categories.value && Array.isArray(categories.value) && categories.value.length > 0;
+});
+
+async function loadCategories() {
+  isLoadingCategories.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/map/categories`);
+    const data = await res.json();
+    if (data.success && data.data && Array.isArray(data.data)) {
+      categories.value = data.data;
+      console.log('[PublishModal] 加载到分类:', categories.value);
+      if (pubCategory.value === null && categories.value.length > 0) {
+        selectDefaultCategory();
+      }
+    } else {
+      categories.value = [];
+    }
+  } catch (e) {
+    console.error('[PublishModal] 加载分类失败:', e);
+    categories.value = [];
+  } finally {
+    isLoadingCategories.value = false;
+  }
+}
+
+function selectDefaultCategory() {
+  if (!hasCategories.value) {
+    pubCategory.value = null;
+    return;
+  }
+
+  const otherCategory = categories.value.find(cat => cat.name === '其他');
+  if (otherCategory) {
+    pubCategory.value = otherCategory.id;
+  } else {
+    pubCategory.value = categories.value[0].id;
+  }
+}
 
 watch(() => props.show, (newVal) => {
   if (newVal) {
@@ -36,12 +77,19 @@ watch(() => props.show, (newVal) => {
     pubType.value = 'lost';
     pubImages.value = [];
     localPendingLocation.value = props.pendingLocation;
-    if (props.categories.length > 0) {
-      const otherCategory = props.categories.find(cat => cat.name === '其他');
-      pubCategory.value = otherCategory ? otherCategory.category_id : props.categories[0].category_id;
-    }
+    loadCategories();
   }
 });
+
+watch(categories, (newVal) => {
+  if (newVal && Array.isArray(newVal) && newVal.length > 0) {
+    if (pubCategory.value === null || !newVal.some(cat => cat.id === pubCategory.value)) {
+      selectDefaultCategory();
+    }
+  } else {
+    pubCategory.value = null;
+  }
+}, { immediate: true, deep: true });
 
 watch(() => props.pendingLocation, (newVal) => {
   localPendingLocation.value = newVal;
@@ -62,28 +110,28 @@ function handleImageUpload(event) {
   const target = event.target;
   const files = Array.from(target.files || []);
   const validFiles = files.filter(file => file.type.startsWith('image/'));
-  
+
   if (validFiles.length === 0) {
     showFeedback('请选择图片文件');
     target.value = '';
     return;
   }
-  
+
   const remaining = 5 - pubImages.value.length;
   const toAdd = validFiles.slice(0, remaining);
-  
+
   const newImages = [...pubImages.value];
   toAdd.forEach(file => {
     newImages.push(file);
   });
   pubImages.value = newImages;
-  
+
   if (toAdd.length < validFiles.length) {
     showFeedback(`已添加 ${toAdd.length} 张图片（最多5张）`);
   } else {
     showFeedback(`已添加 ${toAdd.length} 张图片`);
   }
-  
+
   target.value = '';
   console.log('当前图片数量:', pubImages.value.length);
 }
@@ -128,17 +176,22 @@ async function handleSubmit() {
   const title = pubTitle.value.trim();
   const detail = pubDetail.value.trim();
   const phone = pubPhone.value.trim();
-  const type = pubType.value;
 
   if (!title || !detail) {
-    showToast('标题和描述不能为空', 'warning');
+    window.showToast('标题和描述不能为空', 'warning');
+    return;
+  }
+
+  if (!pubCategory.value) {
+    window.showToast('请选择物品分类', 'warning');
     return;
   }
 
   isSubmitting.value = true;
 
   const userId = localStorage.getItem('user_id');
-  const status = type === 'lost' ? 0 : 1;
+  const type = pubType.value === 'lost' ? 0 : 1;
+  const status = 0;
 
   const formData = new FormData();
   formData.append('user_id', userId || '');
@@ -147,6 +200,7 @@ async function handleSubmit() {
   formData.append('phone', phone);
   formData.append('lng', localPendingLocation.value?.lng || '');
   formData.append('lat', localPendingLocation.value?.lat || '');
+  formData.append('type', type);
   formData.append('status', status);
   formData.append('category_id', pubCategory.value);
 
@@ -161,17 +215,17 @@ async function handleSubmit() {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('发布成功', 'success');
+      window.showToast('发布成功', 'success');
       setTimeout(() => {
         emit('submit', data);
         handleClose();
       }, 1000);
     } else {
-      showToast(data.message || '发布失败', 'error');
+      window.showToast(data.message || '发布失败', 'error');
     }
   } catch (error) {
     console.error(error);
-    showToast('发布接口异常', 'error');
+    window.showToast('发布接口异常', 'error');
   } finally {
     isSubmitting.value = false;
   }
@@ -190,18 +244,18 @@ function handleClose() {
         <h3>发布信息</h3>
         <button class="close-btn" type="button" @click="handleClose" title="关闭">×</button>
       </div>
-      
+
       <div class="modal-body">
         <div class="form-row">
           <label for="pubTitle">标题</label>
           <input id="pubTitle" v-model="pubTitle" type="text" placeholder="请输入标题" />
         </div>
-        
+
         <div class="form-row">
           <label for="pubDetail">描述</label>
           <textarea id="pubDetail" v-model="pubDetail" placeholder="请输入详细描述"></textarea>
         </div>
-        
+
         <div class="form-row">
           <label>类型</label>
           <div class="type-buttons">
@@ -219,16 +273,18 @@ function handleClose() {
             </button>
           </div>
         </div>
-        
+
         <div class="form-row">
           <label for="pubCategory">分类</label>
           <select id="pubCategory" v-model="pubCategory">
-            <option v-for="cat in categories" :key="cat.category_id" :value="cat.category_id">
+            <option v-if="isLoadingCategories" value="">加载中...</option>
+            <option v-else-if="!categories || !Array.isArray(categories) || categories.length === 0" value="">暂无分类</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
             </option>
           </select>
         </div>
-        
+
         <div class="form-row">
           <label>位置</label>
           <div class="location-hint">
@@ -240,31 +296,31 @@ function handleClose() {
             </div>
           </div>
         </div>
-        
+
         <div class="form-row">
           <label>图片</label>
           <div class="image-upload">
-            <input 
+            <input
               id="publishImageInput"
               ref="imageInputRef"
-              type="file" 
-              multiple 
-              accept="image/*" 
-              @change="handleImageUpload" 
-              style="display: none" 
+              type="file"
+              multiple
+              accept="image/*"
+              @change="handleImageUpload"
+              style="display: none"
             />
             <div class="upload-grid">
-              <div 
-                v-for="(img, index) in pubImages" 
-                :key="index" 
+              <div
+                v-for="(img, index) in pubImages"
+                :key="index"
                 class="uploaded-image"
                 v-show="img && typeof img === 'object' && img.type && img.type.startsWith('image/')"
               >
                 <img :src="getImageUrl(img)" :alt="`图片${index + 1}`" />
                 <button class="remove-btn" type="button" @click.stop="removeImage(index)">×</button>
               </div>
-              <div 
-                v-if="pubImages.length < 5" 
+              <div
+                v-if="pubImages.length < 5"
                 class="add-image-box"
                 @click="triggerImageUpload"
               >
@@ -278,13 +334,13 @@ function handleClose() {
             <div class="upload-tip">最多上传5张图片</div>
           </div>
         </div>
-        
+
         <div class="form-row">
           <label for="pubPhone">联系方式</label>
           <input id="pubPhone" v-model="pubPhone" type="text" placeholder="请输入联系方式" />
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <button class="btn" type="button" @click="handleClose" :disabled="isSubmitting">取消</button>
         <button class="btn primary" type="button" @click="handleSubmit" :disabled="isSubmitting">
@@ -378,6 +434,23 @@ function handleClose() {
   padding: 10px 12px;
   font-size: 14px;
   box-sizing: border-box;
+}
+
+.form-row select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 12px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.form-row select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .form-row textarea {
