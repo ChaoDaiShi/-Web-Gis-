@@ -1,0 +1,73 @@
+body {
+    font-family: Arial;
+    background: #e5e5e5;
+}
+
+.header {
+    height: 60px;
+    background: #39a9db;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    font-size: 20px;
+}
+
+.container {
+    height: calc(100vh - 60px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 400px;
+    background: #8fc48f;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.card-inner {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    background: #ccc;
+}
+
+.tabs .active {
+    background: #4caf50;
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.tip {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 10px;
+}
