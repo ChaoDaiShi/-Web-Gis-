@@ -1,0 +1,19 @@
+:root { --brand: #33ccff; --bg: #f5f7fb; --text: #1f2937; --line: #d1d5db; --danger: #dc2626; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif; color: var(--text); background: var(--bg); }
+.topbar { width: 100%; height: 60px; background: var(--brand); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.topbar-title { margin: 0; font-size: clamp(20px, 2.2vw, 34px); line-height: 1; }
+.topbar-user { width: 42px; height: 42px; border-radius: 999px; background: #111827; color: #fff; display: grid; place-items: center; font-size: 18px; }
+.container { max-width: 1280px; margin: 20px auto; padding: 0 16px; }
+.toolbar { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; margin-bottom: 12px; }
+.toolbar select, .toolbar input, .toolbar button { height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font-size: 14px; }
+.toolbar button { cursor: pointer; background: #fff; }
+.table-wrap { border: 1px solid var(--line); border-radius: 12px; overflow: auto; background: #fff; }
+table { width: 100%; min-width: 980px; border-collapse: collapse; }
+th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; font-size: 14px; }
+th { background: #eef9ff; }
+.clickable-row:hover { background: #f9fafb; }
+.ops { display: flex; gap: 6px; align-items: center; }
+.ops button { height: 30px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; white-space: nowrap; writing-mode: horizontal-tb; display: flex; align-items: center; justify-content: center; min-width: 40px; }
+.ops .delete-btn { color: var(--danger); border-color: #fecaca; }
+.status { margin: 10px 2px 0; font-size: 13px; }
