@@ -49,5 +49,3 @@ env/
 *.py
 !api/index.py
 !backend/**/*.py
-defense/
-数据库文档.md

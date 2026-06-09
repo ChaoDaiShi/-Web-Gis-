@@ -209,12 +209,85 @@ def approve_audit(audit_id):
         if target_type == 'lost_item':
             cursor.execute("UPDATE lost_item SET status = 0 WHERE item_id = %s", (target_id,))
         elif target_type == 'claim_form':
-            cursor.execute("UPDATE claim_form SET status = 1 WHERE claim_id = %s", (target_id,))
+            # 获取认领信息
+            cursor.execute("SELECT item_id, user_id FROM claim_form WHERE claim_id = %s", (target_id,))
+            claim_info = cursor.fetchone()
+            
+            if claim_info:
+                item_id = claim_info[0]
+                user_id = claim_info[1]
+                
+                # 更新认领状态
+                cursor.execute("UPDATE claim_form SET status = 1 WHERE claim_id = %s", (target_id,))
+                
+                # 更新物品状态为已认领
+                if item_id:
+                    cursor.execute("UPDATE lost_item SET status = 1 WHERE item_id = %s", (item_id,))
+                    
+                    # 自动添加好友（失主和拾到者）
+                    if user_id:
+                        cursor.execute("SELECT publisher_id FROM lost_item WHERE item_id = %s", (item_id,))
+                        item = cursor.fetchone()
+                        if item and item[0] and item[0] != user_id:
+                            publisher_id = item[0]
+                            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            # 双向好友关系
+                            cursor.execute("""
+                                INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                                VALUES (%s, %s, 'accepted', %s, %s)
+                                ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                            """, (user_id, publisher_id, now, now, now))
+                            cursor.execute("""
+                                INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                                VALUES (%s, %s, 'accepted', %s, %s)
+                                ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                            """, (publisher_id, user_id, now, now, now))
         elif target_type == 'return_form':
-            cursor.execute("UPDATE return_form SET status = 1 WHERE return_id = %s", (target_id,))
+            # 获取归还申请信息
+            cursor.execute("SELECT item_id, user_id, applicant_name, applicant_phone FROM return_form WHERE return_id = %s", (target_id,))
+            return_info = cursor.fetchone()
+            
+            if return_info:
+                item_id = return_info[0]
+                user_id = return_info[1]
+                applicant_name = return_info[2]
+                applicant_phone = return_info[3]
+                
+                # 更新归还申请状态
+                cursor.execute("UPDATE return_form SET status = 1 WHERE return_id = %s", (target_id,))
+                
+                if item_id:
+                    # 更新物品状态为已认领
+                    cursor.execute("UPDATE lost_item SET status = 1 WHERE item_id = %s", (item_id,))
+                    
+                    # 创建认领记录（归还申请审核通过后，创建认领记录）
+                    if user_id:
+                        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        cursor.execute("""
+                            INSERT INTO claim_form (item_id, user_id, applicant_name, applicant_phone, claim_reason, item_description, status, create_time)
+                            VALUES (%s, %s, %s, %s, '归还申请审核通过', '归还申请审核通过', 1, %s)
+                        """, (item_id, user_id, applicant_name, applicant_phone, now))
+                    
+                    # 自动添加好友（归还者和拾到者）
+                    if user_id:
+                        cursor.execute("SELECT publisher_id FROM lost_item WHERE item_id = %s", (item_id,))
+                        item = cursor.fetchone()
+                        if item and item[0] and item[0] != user_id:
+                            publisher_id = item[0]
+                            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            # 双向好友关系
+                            cursor.execute("""
+                                INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                                VALUES (%s, %s, 'accepted', %s, %s)
+                                ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                            """, (user_id, publisher_id, now, now, now))
+                            cursor.execute("""
+                                INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                                VALUES (%s, %s, 'accepted', %s, %s)
+                                ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                            """, (publisher_id, user_id, now, now, now))
         elif target_type == 'user_verify':
-            cursor.execute("UPDATE user_verify SET status = 1, update_time = %s WHERE verify_id = %s",
-                          (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+            cursor.execute("UPDATE user_verify SET status = 1 WHERE verify_id = %s", (target_id,))
             # 更新用户表的角色
             cursor.execute("""
                 UPDATE user u 
@@ -289,8 +362,7 @@ def reject_audit(audit_id):
         elif target_type == 'return_form':
             cursor.execute("UPDATE return_form SET status = 2 WHERE return_id = %s", (target_id,))
         elif target_type == 'user_verify':
-            cursor.execute("UPDATE user_verify SET status = 2, update_time = %s WHERE verify_id = %s",
-                          (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+            cursor.execute("UPDATE user_verify SET status = 2 WHERE verify_id = %s", (target_id,))
         elif target_type == 'appointment':
             cursor.execute("""
                 UPDATE appointment 

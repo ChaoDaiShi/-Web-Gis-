@@ -37,8 +37,6 @@ class COSClient:
         if not secret_id or not secret_key or not bucket:
             raise ValueError("COS配置未完整设置，请检查环境变量")
 
-        print(f"[COS] 初始化 - Bucket: {bucket}, Region: {region}")
-
         config = CosConfig(
             Region=region,
             SecretId=secret_id,
@@ -116,13 +114,10 @@ class COSClient:
         if not url_or_key:
             return None
         if url_or_key.startswith('http'):
-            try:
-                self._init_client()
-                region = self.region if hasattr(self, 'region') else os.environ.get('COS_REGION', 'ap-shanghai')
-                if f".cos.{region}.myqcloud.com/" in url_or_key:
-                    return url_or_key.split(f".cos.{region}.myqcloud.com/")[-1]
-            except Exception:
-                pass
+            self._init_client()
+            region = self.region if hasattr(self, 'region') else os.environ.get('COS_REGION', 'ap-shanghai')
+            if f".cos.{region}.myqcloud.com/" in url_or_key:
+                return url_or_key.split(f".cos.{region}.myqcloud.com/")[-1]
             return url_or_key
         return url_or_key
 

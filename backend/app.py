@@ -2,9 +2,6 @@ from flask import Flask, send_from_directory, request, jsonify, session
 import os
 from dotenv import load_dotenv
 
-from flask_cors import CORS
-import traceback
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -75,24 +72,6 @@ def log_api_call(response):
     return response
 # ==================== 日志记录结束 ====================
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    """确保所有异常响应都带 CORS 头"""
-    from werkzeug.exceptions import HTTPException
-    if isinstance(e, HTTPException):
-        response = e.get_response()
-    else:
-        response = jsonify({
-            'success': False,
-            'message': str(e)
-        })
-        response.status_code = 500
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    traceback.print_exc()
-    return response
-
 BACKEND_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.dirname(BACKEND_ROOT)
 STATIC_FOLDER = os.path.join(BACKEND_ROOT, 'static')
@@ -127,6 +106,11 @@ def register_routes():
     from community import register_community_routes
     from appointment.main import appointment_bp
     from appointment.appointment_items import appointment_items_bp
+    from appointment.return_appointment import return_appointment_bp
+    from user.friend import friend_bp
+    from user.chat import chat_bp
+    from user.user_search import user_search_bp
+    from user.user_profile import user_profile_bp
     
     app.config.from_object(Config)
     db.init_app(app)
@@ -143,6 +127,11 @@ def register_routes():
     register_community_routes(app)
     app.register_blueprint(appointment_bp, url_prefix='/api')
     app.register_blueprint(appointment_items_bp, url_prefix='/api')
+    app.register_blueprint(return_appointment_bp, url_prefix='/api')
+    app.register_blueprint(friend_bp, url_prefix='/api')
+    app.register_blueprint(chat_bp, url_prefix='/api/chat')
+    app.register_blueprint(user_search_bp, url_prefix='/api')
+    app.register_blueprint(user_profile_bp, url_prefix='/api')
 
 register_routes()
 

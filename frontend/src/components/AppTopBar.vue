@@ -41,6 +41,14 @@ function goHome() {
   router.push("/home");
 }
 
+function goFriends() {
+  router.push("/friends");
+}
+
+function goChat() {
+  router.push("/chat");
+}
+
 function getDefaultAvatar() {
   return "👤";
 }
@@ -66,9 +74,39 @@ onMounted(() => {
     </div>
     <div class="app-topbar__right">
       <slot name="back" />
+      <button
+        v-if="variant === 'inner' || variant === 'home'"
+        type="button"
+        class="app-topbar__icon-btn"
+        aria-label="好友"
+        @click="goFriends"
+        title="好友"
+      >
+        👥
+      </button>
+      <button
+        v-if="variant === 'inner' || variant === 'home'"
+        type="button"
+        class="app-topbar__icon-btn"
+        aria-label="聊天"
+        @click="goChat"
+        title="聊天"
+      >
+        💬
+      </button>
       <slot name="actions" />
       <button
         v-if="variant === 'inner'"
+        type="button"
+        class="app-topbar__avatar app-topbar__avatar--click"
+        aria-label="前往个人中心"
+        @click="goProfile"
+      >
+        <img v-if="avatarUrl" :src="avatarUrl" class="app-topbar__avatar-img" />
+        <span v-else>{{ getDefaultAvatar() }}</span>
+      </button>
+      <button
+        v-if="variant === 'home'"
         type="button"
         class="app-topbar__avatar app-topbar__avatar--click"
         aria-label="前往个人中心"
@@ -197,6 +235,28 @@ onMounted(() => {
 
 .app-topbar__avatar--click:hover {
   transform: scale(1.08);
+}
+
+.app-topbar__icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+  border: none;
+  flex-shrink: 0;
+}
+
+.app-topbar__icon-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* 内页：与个人中心/修改资料等一致 */

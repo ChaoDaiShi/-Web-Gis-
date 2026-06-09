@@ -200,6 +200,10 @@ def get_post_detail(post_id):
             conn.close()
             return jsonify({'success': False, 'message': '帖子不存在'}), 404
         
+        # 确保 user_id 存在
+        if 'user_id' not in post or post['user_id'] is None:
+            print(f"警告: 帖子 {post_id} 没有 user_id")
+        
         if post.get('images'):
             try:
                 post['images'] = json.loads(post['images'])

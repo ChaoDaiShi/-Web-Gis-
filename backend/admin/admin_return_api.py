@@ -136,13 +136,13 @@ def add_return_form():
         if cursor: cursor.close()
         if conn: conn.close()
 
-@admin_return_api_bp.route('/return-forms/<return_id>/approve', methods=['POST'])
+@admin_return_api_bp.route('/return-forms/<int:return_id>/approve', methods=['POST'])
 def approve_return_form(return_id):
     conn = None
     cursor = None
     try:
         conn = get_conn()
-        cursor = conn.cursor()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
         
         cursor.execute("SELECT item_id, user_id FROM return_form WHERE return_id = %s", (return_id,))
         return_form = cursor.fetchone()
@@ -150,29 +150,72 @@ def approve_return_form(return_id):
         if not return_form:
             return jsonify({'code': 404, 'message': '归还记录不存在'}), 404
         
+        item_id = return_form.get('item_id')
+        user_id = return_form.get('user_id')
+        
+        # 处理 item_id 为 0 或 None 的情况
+        if item_id == 0 or item_id == '0':
+            item_id = None
+        
+        # 处理 user_id 为空字符串或 0 的情况
+        if user_id == '' or user_id == '0' or user_id == 0:
+            user_id = None
+        
         cursor.execute("UPDATE return_form SET status = 1 WHERE return_id = %s", (return_id,))
-        if return_form[0]:
-            cursor.execute("UPDATE lost_item SET status = 1 WHERE item_id = %s", (return_form[0],))
-        if return_form[1]:
-            send_return_notification(return_form[1], True, return_form[0])
+        
+        if item_id:
+            # 更新物品状态为已认领
+            cursor.execute("UPDATE lost_item SET status = 1 WHERE item_id = %s", (item_id,))
+            
+            # 创建认领记录（归还申请审核通过后，创建认领记录）
+            if user_id:
+                applicant_name = return_form.get('applicant_name', '')
+                applicant_phone = return_form.get('applicant_phone', '')
+                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                cursor.execute("""
+                    INSERT INTO claim_form (item_id, user_id, applicant_name, applicant_phone, claim_reason, item_description, status, create_time)
+                    VALUES (%s, %s, %s, %s, '归还申请审核通过', '归还申请审核通过', 1, %s)
+                """, (item_id, user_id, applicant_name, applicant_phone, now))
+            
+            # 自动添加好友：失主和拾到者
+            if user_id:
+                cursor.execute("SELECT publisher_id FROM lost_item WHERE item_id = %s", (item_id,))
+                item_info = cursor.fetchone()
+                if item_info and item_info.get('publisher_id') and item_info['publisher_id'] != user_id:
+                    publisher_id = item_info['publisher_id']
+                    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    # 创建双向好友关系
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (user_id, publisher_id, now, now, now))
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (publisher_id, user_id, now, now, now))
+        
+        if user_id:
+            send_return_notification(user_id, True, item_id)
         
         conn.commit()
         
-        return jsonify({'code': 200, 'message': '通过成功', 'success': True})
+        return jsonify({'code': 200, 'message': '通过成功，已自动添加好友', 'success': True})
     except Exception as e:
         if conn: conn.rollback()
-        return jsonify({'success': False, 'message': str(e)})
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
 
-@admin_return_api_bp.route('/return-forms/<return_id>/reject', methods=['POST'])
+@admin_return_api_bp.route('/return-forms/<int:return_id>/reject', methods=['POST'])
 def reject_return_form(return_id):
     conn = None
     cursor = None
     try:
         conn = get_conn()
-        cursor = conn.cursor()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
         
         cursor.execute("SELECT item_id, user_id FROM return_form WHERE return_id = %s", (return_id,))
         return_form = cursor.fetchone()
@@ -180,8 +223,14 @@ def reject_return_form(return_id):
         if not return_form:
             return jsonify({'code': 404, 'message': '归还记录不存在'}), 404
         
-        user_id = return_form[1]
-        item_id = return_form[0]
+        user_id = return_form.get('user_id')
+        item_id = return_form.get('item_id')
+        
+        # 处理空值
+        if user_id == '' or user_id == '0' or user_id == 0:
+            user_id = None
+        if item_id == 0 or item_id == '0':
+            item_id = None
         
         cursor.execute("UPDATE return_form SET status = 2 WHERE return_id = %s", (return_id,))
         
@@ -193,7 +242,7 @@ def reject_return_form(return_id):
         return jsonify({'code': 200, 'message': '拒绝成功', 'success': True})
     except Exception as e:
         if conn: conn.rollback()
-        return jsonify({'success': False, 'message': str(e)})
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()

@@ -27,10 +27,10 @@ def get_role_display(role):
 def get_signed_url(url_or_key):
     if not url_or_key:
         return None
+    key = cos_client.normalize_key(url_or_key)
+    if not key:
+        return None
     try:
-        key = cos_client.normalize_key(url_or_key)
-        if not key:
-            return None
         return cos_client.get_presigned_url(key, expires=3600)
     except Exception as e:
         print(f"生成签名URL失败: {e}")

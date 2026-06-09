@@ -355,6 +355,10 @@ body {
   background: #4caf50;
 }
 
+.type-appointment {
+  background: #52c41a;
+}
+
 .message-time {
   color: #666;
   font-size: 12px;

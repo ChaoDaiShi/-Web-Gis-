@@ -52,6 +52,10 @@ def add_my_claim():
     data = request.get_json()
     user_id = data.get('user_id')
     item_id = data.get('item_id')
+    applicant_name = data.get('applicant_name', '')
+    applicant_phone = data.get('applicant_phone', '13800138000')
+    claim_reason = data.get('claim_reason', '这是我的物品')
+    item_description = data.get('item_description', '')
 
     if not user_id:
         return jsonify({'success': False, 'message': '用户ID不能为空'}), 400
@@ -63,10 +67,23 @@ def add_my_claim():
         conn = get_conn()
         cursor = conn.cursor()
 
+        # 检查是否已有认领记录
         cursor.execute("""
-            INSERT INTO claim_form (item_id, user_id, create_time, status)
-            VALUES (%s, %s, %s, 0)
-        """, (int(item_id), int(user_id), datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            SELECT claim_id FROM claim_form WHERE item_id = %s AND user_id = %s
+        """, (int(item_id), int(user_id)))
+        
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "message": "您已提交过认领申请"}), 400
+
+        # 创建认领记录，包含所有必填字段
+        cursor.execute("""
+            INSERT INTO claim_form (item_id, user_id, applicant_name, applicant_phone, 
+                                   claim_reason, item_description, create_time, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 0)
+        """, (int(item_id), int(user_id), applicant_name, applicant_phone, 
+              claim_reason, item_description, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
         conn.commit()
 

@@ -59,7 +59,7 @@ def audit_claim(claim_id):
     cursor = None
     try:
         conn = get_conn()
-        cursor = conn.cursor()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
         
         cursor.execute("SELECT item_id, user_id FROM claim_form WHERE claim_id = %s", (claim_id,))
         claim = cursor.fetchone()
@@ -92,12 +92,33 @@ def audit_claim(claim_id):
                 UPDATE lost_item 
                 SET status = 'claimed', found_time = %s 
                 WHERE item_id = %s
-            """, (now, claim[0]))
+            """, (now, claim['item_id']))
             
-            send_claim_notification(claim[1], True, claim[0])
+            # 自动添加好友：失主和拾到者
+            item_id = claim['item_id']
+            claimer_id = claim['user_id']
+            
+            if item_id and claimer_id:
+                cursor.execute("SELECT publisher_id FROM lost_item WHERE item_id = %s", (item_id,))
+                item_info = cursor.fetchone()
+                if item_info and item_info['publisher_id'] and item_info['publisher_id'] != claimer_id:
+                    publisher_id = item_info['publisher_id']
+                    # 创建双向好友关系（使用 ON DUPLICATE KEY UPDATE 避免重复）
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (claimer_id, publisher_id, now, now, now))
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (publisher_id, claimer_id, now, now, now))
+            
+            send_claim_notification(claim['user_id'], True, claim['item_id'])
         else:
-            user_id = claim[1]
-            item_id = claim[0]
+            user_id = claim['user_id']
+            item_id = claim['item_id']
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute("DELETE FROM claim_form WHERE claim_id = %s", (claim_id,))
             # 同步更新统一审核表 audit
@@ -112,7 +133,7 @@ def audit_claim(claim_id):
         
         return jsonify({
             'code': 200,
-            'message': '审核成功'
+            'message': '审核成功，已自动添加好友' if status == 'approved' else '审核成功'
         })
     except Exception as e:
         if conn: conn.rollback()
@@ -310,13 +331,31 @@ def approve_claim_form(claim_id):
         
         if item_id is not None:
             cursor.execute("UPDATE lost_item SET status = 1 WHERE item_id = %s", (item_id,))
+            
+            # 获取失物发布者，自动添加好友
+            if user_id is not None:
+                cursor.execute("SELECT publisher_id FROM lost_item WHERE item_id = %s", (item_id,))
+                item_info = cursor.fetchone()
+                if item_info and item_info[0] and item_info[0] != user_id:
+                    publisher_id = item_info[0]
+                    # 创建双向好友关系
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (user_id, publisher_id, now, now, now))
+                    cursor.execute("""
+                        INSERT INTO user_friend (user_id, friend_id, status, created_at, updated_at)
+                        VALUES (%s, %s, 'accepted', %s, %s)
+                        ON DUPLICATE KEY UPDATE status = 'accepted', updated_at = %s
+                    """, (publisher_id, user_id, now, now, now))
         
         if user_id is not None:
             send_claim_notification(user_id, True, item_id)
         
         conn.commit()
         
-        return jsonify({'code': 200, 'message': '通过成功', 'success': True})
+        return jsonify({'code': 200, 'message': '通过成功，已自动添加好友', 'success': True})
     except Exception as e:
         if conn: conn.rollback()
         return jsonify({'success': False, 'message': str(e)})

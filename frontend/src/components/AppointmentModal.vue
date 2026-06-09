@@ -3,7 +3,10 @@
     <div class="appointment-modal">
       <div class="modal-header">
         <h2>我的预约</h2>
-        <button class="close-btn" @click="handleClose">×</button>
+        <div class="header-actions">
+          <button class="btn-return" @click="goToReturnAppointment">📅 预约归还</button>
+          <button class="close-btn" @click="handleClose">×</button>
+        </div>
       </div>
       
       <div class="modal-body">
@@ -143,10 +146,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const emit = defineEmits(['close']);
 const showToast = window.showToast;
 const API_BASE = 'http://127.0.0.1:5000/api';
+const router = useRouter();
 
 const appointments = ref([]);
 const loading = ref(true);
@@ -282,6 +287,11 @@ function handleClose() {
   emit('close');
 }
 
+function goToReturnAppointment() {
+  emit('close');
+  router.push('/return-appointment');
+}
+
 onMounted(() => {
   loadAppointments();
 });
@@ -343,6 +353,27 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 20px;
   color: white;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-return {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-return:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .close-btn {

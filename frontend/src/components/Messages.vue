@@ -1,12 +1,14 @@
 <!-- 消息页面 -->
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import AppTopBar from "../components/AppTopBar.vue";
 import MarkerDetailModal from "../components/MarkerDetailModal.vue";
 
 const showToast = window.showToast;
 const showConfirm = window.showConfirm;
 const API_BASE = "http://127.0.0.1:5000/api";
+const router = useRouter();
 const userId = localStorage.getItem("user_id");
 const activeTab = ref("all");
 const messages = ref([]);
@@ -47,7 +49,8 @@ const getMessageTypeText = (type) => {
     claim: "认领通知", 
     publish: "发布通知",
     reminder: "提醒通知",
-    return: "归还通知"
+    return: "归还通知",
+    appointment: "预约通知"
   };
   return typeMap[type] || "认证通知";
 };
@@ -58,7 +61,8 @@ const getMessageTypeClass = (type) => {
     claim: "type-claim",
     publish: "type-publish",
     reminder: "type-reminder",
-    return: "type-return"
+    return: "type-return",
+    appointment: "type-appointment"
   };
   return classMap[type] || "type-system";
 };
@@ -70,13 +74,14 @@ const filteredMessages = computed(() => {
   if (activeTab.value === "all") return messages.value;
   if (activeTab.value === "unread") return messages.value.filter(msg => !msg.is_read);
   if (activeTab.value === "system") {
-    // 系统通知包含：system|claim|publish|return 类型
+    // 系统通知包含：system|claim|publish|return|appointment 类型
     if (systemSubTab.value === "all") {
       return messages.value.filter(msg => 
         msg.message_type === 'system' || 
         msg.message_type === 'claim' || 
         msg.message_type === 'publish' || 
-        msg.message_type === 'return'
+        msg.message_type === 'return' ||
+        msg.message_type === 'appointment'
       );
     } else {
       // 按子分类过滤
@@ -493,6 +498,13 @@ function extractItemId(content) {
 }
 
 async function handleMessageClick(message) {
+  // 如果是预约消息，跳转到预约页面
+  if (message.message_type === 'appointment' && message.related_id) {
+    markAsRead(message.message_id);
+    router.push('/appointments');
+    return;
+  }
+  
   const itemId = extractItemId(message.content);
   if (!itemId) {
     return;

@@ -16,6 +16,10 @@ import AppointmentForm from '../components/AppointmentForm.vue'
 import AppointmentList from '../components/AppointmentList.vue'
 import AppointmentManage from '../components/AppointmentManage.vue'
 import AppointmentCreate from '../components/AppointmentCreate.vue'
+import UserProfile from '../views/UserProfile.vue'
+import Chat from '../views/Chat.vue'
+import Friends from '../views/Friends.vue'
+import ReturnAppointment from '../views/ReturnAppointment.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -34,6 +38,11 @@ const routes = [
   { path: '/appointment/form', component: AppointmentForm },
   { path: '/appointment/list', component: AppointmentList },
   { path: '/appointment/create', component: AppointmentCreate },
+  { path: '/user/:id', component: UserProfile },
+  { path: '/chat', component: Chat },
+  { path: '/chat/:id', component: Chat },
+  { path: '/friends', component: Friends },
+  { path: '/return-appointment', component: ReturnAppointment },
   {
     path: '/admin',
     component: Admin,

@@ -140,6 +140,15 @@ function goToHome() {
   router.push("/home");
 }
 
+function goToUserProfile(userId) {
+  console.log("点击用户主页，用户ID:", userId);
+  if (userId) {
+    router.push(`/user/${userId}`);
+  } else {
+    showToast("无法获取用户信息", "error");
+  }
+}
+
 function showImagePreview(imgSrc) {
   previewImage.value = imgSrc;
   showImagePreviewModal.value = true;
@@ -243,6 +252,7 @@ async function viewPost(postId) {
     const res = await fetch(`${API_BASE}/community/posts/${postId}?user_id=${userId}`);
     const data = await res.json();
     if (data.success) {
+      console.log("帖子详情数据:", data.data);
       currentPost.value = data.data;
       showPostDetail.value = true;
       loadComments(postId);
@@ -833,7 +843,7 @@ onUnmounted(() => {
                   </span>
                 </div>
                 <div class="post-meta">
-                  <span class="author-avatar-mini">
+                  <span class="author-avatar-mini" @click.stop="goToUserProfile(post.user_id)" style="cursor: pointer;">
                     <img 
                       v-if="post.author_avatar" 
                       :src="IMAGE_BASE + post.author_avatar" 
@@ -842,7 +852,7 @@ onUnmounted(() => {
                     />
                     <span v-else>{{ post.author_name?.charAt(0) || '匿' }}</span>
                   </span>
-                  <span class="author-name">{{ post.author_name || '匿名用户' }}</span>
+                  <span class="author-name" @click.stop="goToUserProfile(post.user_id)" style="cursor: pointer;">{{ post.author_name || '匿名用户' }}</span>
                   <button 
                     v-if="post.user_id != userId"
                     class="follow-btn-small"
@@ -996,12 +1006,12 @@ onUnmounted(() => {
         </div>
         <div class="modal-body">
           <div class="post-author">
-            <div class="author-avatar">
+            <div class="author-avatar" @click="goToUserProfile(currentPost.user_id)" style="cursor: pointer;">
               <img v-if="currentPost.author_avatar" :src="IMAGE_BASE + currentPost.author_avatar" alt="头像" />
               <div v-else class="avatar-placeholder">{{ currentPost.author_name?.charAt(0) || '匿' }}</div>
             </div>
             <div class="author-info">
-              <span class="name">{{ currentPost.author_name || '匿名用户' }}</span>
+              <span class="name" @click="goToUserProfile(currentPost.user_id)" style="cursor: pointer;">{{ currentPost.author_name || '匿名用户' }}</span>
               <span class="time">{{ formatTime(currentPost.created_at) }}</span>
             </div>
             <div class="author-actions">
@@ -1054,13 +1064,13 @@ onUnmounted(() => {
             
             <div class="comments-list">
               <div v-for="comment in comments" :key="comment.comment_id" class="comment-item">
-                <div class="comment-avatar">
+                <div class="comment-avatar" @click="goToUserProfile(comment.user_id)" style="cursor: pointer;">
                   <img v-if="comment.author_avatar" :src="comment.author_avatar.startsWith('http') ? comment.author_avatar : IMAGE_BASE + comment.author_avatar" alt="头像" />
                   <div v-else class="avatar-placeholder">{{ comment.author_name?.charAt(0) || '匿' }}</div>
                 </div>
                 <div class="comment-body">
                   <div class="comment-header">
-                    <span class="comment-author">{{ comment.author_name || '匿名用户' }}</span>
+                    <span class="comment-author" @click="goToUserProfile(comment.user_id)" style="cursor: pointer;">{{ comment.author_name || '匿名用户' }}</span>
                     <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
                   </div>
                   <div class="comment-content">{{ comment.content }}</div>
@@ -1082,12 +1092,12 @@ onUnmounted(() => {
                   
                   <div v-if="comment.replies && comment.replies.length > 0" class="replies">
                     <div v-for="reply in comment.replies" :key="reply.comment_id" class="reply-item">
-                      <div class="comment-avatar small">
+                      <div class="comment-avatar small" @click="goToUserProfile(reply.user_id)" style="cursor: pointer;">
                         <img v-if="reply.author_avatar" :src="reply.author_avatar.startsWith('http') ? reply.author_avatar : IMAGE_BASE + reply.author_avatar" alt="头像" />
                         <div v-else class="avatar-placeholder">{{ reply.author_name?.charAt(0) || '匿' }}</div>
                       </div>
                       <div class="reply-body">
-                        <span class="reply-author">{{ reply.author_name || '匿名用户' }}</span>
+                        <span class="reply-author" @click="goToUserProfile(reply.user_id)" style="cursor: pointer;">{{ reply.author_name || '匿名用户' }}</span>
                         <span class="reply-content">{{ reply.content }}</span>
                         <span class="reply-time">{{ formatTime(reply.created_at) }}</span>
                       </div>

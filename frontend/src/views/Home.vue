@@ -51,6 +51,10 @@ const categories = ref([]);
 const showDetailModal = ref(false);
 const showSearchModal = ref(false);
 const showAppointmentModal = ref(false);
+const showUserSearchModal = ref(false);
+const userSearchInput = ref("");
+const userSearchResults = ref([]);
+const userSearchLoading = ref(false);
 const searchResults = ref([]);
 const avatarUrl = ref("");
 const username = ref("");
@@ -1146,6 +1150,46 @@ function goToAppointmentList() {
   showAppointmentModal.value = true;
 }
 
+async function searchUser() {
+  const keyword = userSearchInput.value.trim();
+  if (!keyword) {
+    showToast('请输入用户ID或用户名', 'error');
+    return;
+  }
+  
+  userSearchLoading.value = true;
+  try {
+    const res = await fetch(`http://127.0.0.1:5000/api/users/search?keyword=${encodeURIComponent(keyword)}`);
+    const data = await res.json();
+    
+    if (data.success) {
+      userSearchResults.value = data.data || [];
+      if (userSearchResults.value.length === 0) {
+        showToast('未找到匹配的用户', 'info');
+      }
+    } else {
+      showToast(data.message || '搜索失败', 'error');
+    }
+  } catch (error) {
+    console.error('搜索用户失败:', error);
+    showToast('网络错误', 'error');
+  } finally {
+    userSearchLoading.value = false;
+  }
+}
+
+function goToUserProfile(userId) {
+  showUserSearchModal.value = false;
+  router.push(`/user/${userId}`);
+}
+
+function getAvatarUrl(avatar) {
+  if (!avatar) return '';
+  if (avatar.startsWith('http')) return avatar;
+  if (avatar.startsWith('/')) return `http://127.0.0.1:5000${avatar}`;
+  return `http://127.0.0.1:5000/${avatar}`;
+}
+
 watch(
   () => mode.value,
   () => nextTick(() => mapRef.value && mapRef.value.resize()),
@@ -1217,6 +1261,9 @@ onMounted(async () => {
         </div>
       </template>
       <template #actions>
+        <button class="user-search-btn" type="button" title="搜索用户" @click="showUserSearchModal = true">
+          🔍
+        </button>
         <button class="community-btn" type="button" title="校园社区" @click="goToCommunity">
           📢
         </button>
@@ -1225,10 +1272,6 @@ onMounted(async () => {
         </button>
         <button class="notification-btn" type="button" title="通知消息" @click="goToMessages">
           🔔
-        </button>
-        <button class="avatar-btn" type="button" title="前往个人主页" @click="goProfile">
-          <img v-if="avatarUrl" :src="avatarUrl" class="avatar-img" />
-          <span v-else>{{ getDefaultAvatar() }}</span>
         </button>
       </template>
     </AppTopBar>
@@ -1597,6 +1640,54 @@ onMounted(async () => {
       @close="showAppointmentModal = false"
     />
     
+    <!-- 用户搜索弹窗 -->
+    <div v-if="showUserSearchModal" class="user-search-modal-overlay" @click.self="showUserSearchModal = false">
+      <div class="user-search-modal">
+        <div class="modal-header">
+          <h3>搜索用户</h3>
+          <button class="close-btn" @click="showUserSearchModal = false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="search-input-wrapper">
+            <input 
+              v-model="userSearchInput"
+              type="text"
+              placeholder="输入用户ID或用户名搜索"
+              @keydown.enter="searchUser"
+            />
+            <button class="search-btn" @click="searchUser" :disabled="userSearchLoading">
+              {{ userSearchLoading ? '搜索中...' : '搜索' }}
+            </button>
+          </div>
+          
+          <div class="search-results" v-if="userSearchResults.length > 0">
+            <div 
+              v-for="user in userSearchResults" 
+              :key="user.user_id"
+              class="user-card"
+              @click="goToUserProfile(user.user_id)"
+            >
+              <div class="user-avatar">
+                <img v-if="user.avatar" :src="getAvatarUrl(user.avatar)" alt="头像" />
+                <span v-else>{{ user.username?.charAt(0) || '?' }}</span>
+              </div>
+              <div class="user-info">
+                <p class="user-name">{{ user.username }}</p>
+                <p class="user-id">ID: {{ user.user_id }}</p>
+              </div>
+              <div class="user-action">
+                <span>查看主页 →</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="empty-hint" v-else-if="userSearchInput && !userSearchLoading">
+            <p>输入关键词后按回车或点击搜索按钮</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div 
       v-if="showMarkerSelector" 
       class="modal-overlay" 
@@ -1646,6 +1737,29 @@ onMounted(async () => {
 }
 
 /* 社区按钮样式 */
+.user-search-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 18px;
+  border: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.user-search-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
 .community-btn {
   width: 42px;
   height: 42px;
@@ -1910,4 +2024,183 @@ onMounted(async () => {
 
 .back-to-list-btn:hover {
   background: #2563eb !important;
+}
+
+/* 用户搜索弹窗样式 */
+.user-search-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.user-search-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.user-search-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.user-search-modal .modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: white;
+}
+
+.user-search-modal .close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.user-search-modal .close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.user-search-modal .modal-body {
+  padding: 24px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.search-input-wrapper input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.search-input-wrapper input:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
+.search-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.search-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.user-card:hover {
+  background: #e8f4ff;
+  transform: translateX(4px);
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-id {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.user-action {
+  color: #667eea;
+  font-size: 14px;
+}
+
+.empty-hint {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.empty-hint p {
+  margin: 0;
 }</style>

@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>校园失物招领系统 - 界面展示</title>
+  <link href="https://fonts.googleapis.com/css2?family=Microsoft+YaHei&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #33ccff;
+      --bg: #f3f4f6;
+      --yellow: #d1d100;
+      --text: #1f2937;
+      --line: #d1d5db;
+      --danger: #dc2626;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    header {
+      padding: 32px 40px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #00ffaa, #4dadff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 24px 20px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 10px 24px;
+      border: 1px solid rgba(0, 255, 170, 0.3);
+      background: rgba(0, 255, 170, 0.1);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(0, 255, 170, 0.2);
+      border-color: rgba(0, 255, 170, 0.6);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(0, 255, 170, 0.3), rgba(77, 173, 255, 0.3));
+      border-color: #00ffaa;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 40px 60px;
+    }
+
+    .demo-container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: 600px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* ==================== 登录页面样式 ==================== */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+      background: #111827;
+      position: relative;
+    }
+
+    .login-topbar {
+      width: 100%;
+      height: 60px;
+      background: #39a9db;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .login-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .login-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #39a9db;
+      font-weight: bold;
+    }
+
+    .login-topbar-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .login-topbar-right {
+      display: flex;
+      gap: 24px;
+    }
+
+    .login-topbar-right a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .login-video-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .login-video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
+    .login-content-wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 45px 50px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15),
+                  0 10px 30px rgba(0, 0, 0, 0.1),
+                  0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      color: #1e293b;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 30px 0;
+    }
+
+    .login-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 30px;
+      justify-content: center;
+      background: #f3f4f6;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .login-tabs button {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #64748b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 100px;
+    }
+
+    .login-tabs button:hover {
+      background: rgba(57, 169, 219, 0.1);
+    }
+
+    .login-tabs button.active {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #1e293b;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: #33ccff;
+      box-shadow: 0 0 0 3px rgba(51, 204, 255, 0.15);
+    }
+
+    .captcha-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .captcha-row .form-group {
+      flex: 1;
+    }
+
+    .captcha-box {
+      width: 120px;
+      height: 44px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2563eb;
+      letter-spacing: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .captcha-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(51, 204, 255, 0.35);
+    }
+
+    /* ==================== 主页样式 ==================== */
+    .home-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+      background: var(--bg);
+    }
+
+    .topbar {
+      height: 60px;
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    .search-wrap input {
+      width: 300px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .notification-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.3);
+      color: #1f2937;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .notification-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    .avatar-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #111827;
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .avatar-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .home-content {
+      display: flex;
+      flex: 1;
+    }
+
+    .list-panel {
+      width: 280px;
+      background: linear-gradient(135deg, #fffef5 0%, #fff9c4 100%);
+      border-right: 1px solid #e5e5e5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-header {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 14px 16px;
+      font-weight: 700;
+      border-bottom: 1px solid #fde68a;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .add-btn {
+      background: #f59e0b;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .add-btn:hover {
+      background: #d97706;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .filter-tabs button {
+      flex: 1;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666;
+      transition: all 0.2s;
+    }
+
+    .filter-tabs button.active {
+      background: #f59e0b;
+      color: #fff;
+    }
+
+    .item-list {
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .item-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-left: 4px solid #f59e0b;
+      transition: all 0.2s;
+    }
+
+    .item-card:hover {
+      background: #f9f9f9;
+      transform: translateX(4px);
+    }
+
+    .item-card-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .badge-lost {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-found {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .item-card-info {
+      font-size: 13px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-panel {
+      flex: 1;
+      background: #ffffff;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-placeholder {
+      text-align: center;
+      color: rgba(51, 204, 255, 0.5);
+    }
+
+    .map-placeholder-icon {
+      font-size: 80px;
+      margin-bottom: 16px;
+    }
+
+    .map-placeholder-text {
+      font-size: 20px;
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .map-control-btn {
+      padding: 8px 14px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .map-control-btn:hover {
+      background: #f9fafb;
+    }
+
+    .map-control-btn.active {
+      background: #33ccff;
+      color: #fff;
+      border-color: #33ccff;
+    }
+
+    /* 地图标记 */
+    .marker-wrap {
+      position: relative;
+      width: 34px;
+      height: 48px;
+    }
+
+    .marker-core {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 50% 50% 0;
+      transform: translate(-50%, -100%) rotate(-45deg);
+      border: 2px solid #fff;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+    }
+
+    .marker-lost .marker-core {
+      background: linear-gradient(135deg, #f97316 0%, #ef4444 70%);
+    }
+
+    .marker-found .marker-core {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 70%);
+    }
+
+    .marker-wave {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      transform: translate(-50%, -100%);
+      animation: markerPulse 1.8s ease-out infinite;
+    }
+
+    .marker-lost .marker-wave {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    .marker-found .marker-wave {
+      background: rgba(59, 130, 246, 0.3);
+    }
+
+    @keyframes markerPulse {
+      0% {
+        transform: translate(-50%, -100%) scale(1);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35);
+      }
+      70% {
+        transform: translate(-50%, -100%) scale(1.08);
+        box-shadow: 0 0 0 16px rgba(245, 158, 11, 0);
+      }
+      100% {
+        transform: translate(-50%, -100%) scale(1);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+
+    .marker-label {
+      position: absolute;
+      left: 50%;
+      top: -8px;
+      transform: translate(-50%, -100%);
+      min-width: 62px;
+      max-width: 120px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.2;
+      color: #fff;
+      background: rgba(17, 24, 39, 0.88);
+      border-radius: 999px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .map-markers-demo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 80px;
+    }
+
+    .marker-row {
+      display: flex;
+      gap: 120px;
+    }
+
+    /* ==================== 个人中心样式 ==================== */
+    .profile-screen {
+      background: #f5f7fb;
+      min-height: 600px;
+    }
+
+    .profile-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-container {
+      display: flex;
+      margin-top: 60px;
+      min-height: calc(100vh - 60px);
+    }
+
+    .profile-sidebar {
+      width: 260px;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .profile-username {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .profile-userid {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .profile-nav-buttons {
+      width: 100%;
+    }
+
+    .profile-nav-btn {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .profile-nav-btn:hover {
+      background: #f0f9ff;
+    }
+
+    .profile-nav-btn.active {
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .profile-logout {
+      margin-top: auto;
+      padding-top: 20px;
+      width: 100%;
+      border-top: 1px solid #eee;
+    }
+
+    .profile-logout-btn {
+      width: 100%;
+      padding: 10px;
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .profile-main {
+      flex: 1;
+      padding: 24px;
+      background: rgba(245, 245, 245, 0.15);
+    }
+
+    .profile-content-panel {
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: calc(100vh - 108px);
+    }
+
+    .profile-panel-header {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .profile-panel-tab {
+      padding: 8px 16px;
+      background: #33ccff;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .profile-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .profile-info-item {
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      background: rgba(248, 249, 250, 0.5);
+      border: 1px solid rgba(221, 221, 221, 0.6);
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #555;
+      min-width: 80px;
+    }
+
+    .info-value {
+      color: #333;
+    }
+
+    .profile-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .profile-data-table th,
+    .profile-data-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .profile-data-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .table-action-btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+      margin: 0 4px;
+    }
+
+    .table-action-btn.edit {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #fff;
+    }
+
+    .table-action-btn.delete {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      color: #fff;
+    }
+
+    /* ==================== 后台管理样式 ==================== */
+    .admin-screen {
+      background: #f5f7fb;
+      min-height: 600px;
+    }
+
+    .admin-topbar {
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    .admin-title {
+      font-size: 22px;
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    .admin-logout {
+      padding: 8px 16px;
+      background: #111827;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .admin-container {
+      max-width: 1280px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .admin-toolbar select,
+    .admin-toolbar input,
+    .admin-toolbar button {
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    .admin-toolbar input {
+      flex: 1;
+    }
+
+    .admin-toolbar button {
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .admin-toolbar button.primary {
+      background: linear-gradient(135deg, #33ccff 0%, #0099cc 100%);
+      color: #fff;
+      border: none;
+    }
+
+    .admin-table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .admin-table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+    }
+
+    .admin-table th,
+    .admin-table td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .admin-table th {
+      background: #eef9ff;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .admin-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .admin-ops button {
+      padding: 6px 12px;
+      margin-right: 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .admin-ops .view-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+    }
+
+    .admin-ops .approve-btn {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+    }
+
+    .admin-ops .reject-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+    }
+
+    .admin-ops .delete-btn {
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+
+    .status-badge-admin {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-approved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* ==================== Toast提示 ==================== */
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 14px 24px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.warning {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>校园失物招领与位置追踪系统</h1>
+    <p class="subtitle">界面功能展示 · Campus Lost & Found System</p>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" data-screen="login">登录注册</button>
+    <button class="nav-btn" data-screen="home">地图主页</button>
+    <button class="nav-btn" data-screen="profile">个人中心</button>
+    <button class="nav-btn" data-screen="admin">后台管理</button>
+  </nav>
+
+  <main>
+    <div class="demo-container">
+      <!-- ==================== 登录页面 ==================== -->
+      <section class="screen active login-screen" id="login">
+        <div class="login-topbar">
+          <div class="login-topbar-left">
+            <div class="login-logo">校</div>
+            <span class="login-topbar-title">校园失物招领与位置追踪系统</span>
+          </div>
+          <div class="login-topbar-right">
+            <a href="#">首页</a>
+            <a href="#">关于我们</a>
+          </div>
+        </div>
+        <video class="login-video-bg" autoplay muted loop>
+          <source src="login-background.mp4" type="video/mp4">
+        </video>
+        <div class="login-video-overlay"></div>
+        <div class="login-content-wrapper">
+          <div class="login-card">
+            <h2>欢迎</h2>
+            <div class="login-tabs">
+              <button class="active" onclick="switchLoginTab(this, 'login')">登录</button>
+              <button onclick="switchLoginTab(this, 'register')">注册</button>
+              <button onclick="switchLoginTab(this, 'admin')">管理员登录</button>
+            </div>
+            
+            <!-- 登录表单 -->
+            <div id="login-form" class="form-content">
+              <div class="form-group">
+                <label>账号</label>
+                <input type="text" placeholder="请输入邮箱或用户名">
+              </div>
+              <div class="form-group">
+                <label>密码</label>
+                <input type="password" placeholder="请输入密码">
+              </div>
+              <div class="captcha-row">
+                <div class="form-group">
+                  <label>验证码</label>
+                  <input type="text" placeholder="请输入验证码">
+                </div>
+                <div class="captcha-box" onclick="refreshCaptcha(this)">A3B7K</div>
+              </div>
+              <button class="login-btn" onclick="showToast('登录成功！正在跳转...', 'success')">登 录</button>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div id="register-form" class="form-content" style="display: none;">
+              <div class="form-group">
+                <label>用户名</label>
+                <input type="text" placeholder="请输入用户名（2-20个字符）">
+              </div>
+              <div class="form-group">
+                <label>邮箱</label>
+                <input type="text" placeholder="请输入邮箱地址">
+              </div>
+              <div class="form-group">
+                <label>学号</label>
+                <input type="text" placeholder="请输入学号">
+              </div>
+              <div class="form-group">
+                <label>密码</label>
+                <input type="password" placeholder="请输入密码（8-32个字符）">
+              </div>
+              <div class="form-group">
+                <label>确认密码</label>
+                <input type="password" placeholder="请再次输入密码">
+              </div>
+              <button class="login-btn" onclick="showToast('注册成功！', 'success')">注 册</button>
+            </div>
+            
+            <!-- 管理员登录表单 -->
+            <div id="admin-form" class="form-content" style="display: none;">
+              <div class="form-group">
+                <label>管理员账号</label>
+                <input type="text" placeholder="请输入管理员账号">
+              </div>
+              <div class="form-group">
+                <label>密码</label>
+                <input type="password" placeholder="请输入密码">
+              </div>
+              <div class="captcha-row">
+                <div class="form-group">
+                  <label>验证码</label>
+                  <input type="text" placeholder="请输入验证码">
+                </div>
+                <div class="captcha-box" onclick="refreshCaptcha(this)">B8C2D</div>
+              </div>
+              <button class="login-btn" onclick="showToast('管理员登录成功！', 'success')">登 录</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 主页 ==================== -->
+      <section class="screen home-screen" id="home">
+        <div class="topbar">
+          <div class="topbar-left">
+            <img src="https://via.placeholder.com/44x44/33ccff/ffffff?text=校" alt="校徽" class="logo-img">
+            <span class="topbar-title">校园失物招领与位置追踪系统</span>
+          </div>
+          <div class="search-wrap">
+            <input type="text" placeholder="搜索标题/描述并定位...">
+          </div>
+          <div class="topbar-right">
+            <button class="notification-btn" onclick="showToast('暂无新消息', 'warning')">🔔</button>
+            <button class="avatar-btn" onclick="showToast('查看个人中心', 'success')">张</button>
+          </div>
+        </div>
+        <div class="home-content">
+          <div class="list-panel">
+            <div class="list-header">
+              <div class="header-top">
+                <span>📋 物品列表</span>
+                <button class="add-btn" onclick="showToast('打开发布弹窗', 'success')">+ 发布</button>
+              </div>
+              <div class="filter-tabs">
+                <button class="active" onclick="switchFilter(this)">全部</button>
+                <button onclick="switchFilter(this)">失物</button>
+                <button onclick="switchFilter(this)">拾物</button>
+              </div>
+            </div>
+            <div class="item-list">
+              <div class="item-card" onclick="showToast('查看物品详情', 'success')">
+                <div class="item-card-title">
+                  <span>🔴 黑色钱包</span>
+                  <span class="status-badge badge-lost">失物</span>
+                </div>
+                <div class="item-card-info">
+                  <span>📍 教学楼A座</span>
+                  <span>2分钟前</span>
+                </div>
+              </div>
+              <div class="item-card" onclick="showToast('查看物品详情', 'success')">
+                <div class="item-card-title">
+                  <span>🟢 学生证一张</span>
+                  <span class="status-badge badge-found">拾物</span>
+                </div>
+                <div class="item-card-info">
+                  <span>📍 图书馆</span>
+                  <span>15分钟前</span>
+                </div>
+              </div>
+              <div class="item-card" onclick="showToast('查看物品详情', 'success')">
+                <div class="item-card-title">
+                  <span>🔴 黑色双肩包</span>
+                  <span class="status-badge badge-lost">失物</span>
+                </div>
+                <div class="item-card-info">
+                  <span>📍 食堂二楼</span>
+                  <span>30分钟前</span>
+                </div>
+              </div>
+              <div class="item-card" onclick="showToast('查看物品详情', 'success')">
+                <div class="item-card-title">
+                  <span>🟢 iPhone 15</span>
+                  <span class="status-badge badge-found">拾物</span>
+                </div>
+                <div class="item-card-info">
+                  <span>📍 操场看台</span>
+                  <span>1小时前</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="map-panel">
+            <div class="map-controls">
+              <button class="map-control-btn active">🗺️ 地图</button>
+              <button class="map-control-btn" onclick="this.classList.toggle('active'); showToast('切换视图模式', 'success')">🏢 3D</button>
+              <button class="map-control-btn" onclick="this.classList.toggle('active'); showToast('切换卫星视图', 'success')">🛰️ 卫星</button>
+            </div>
+            <div class="map-markers-demo">
+              <div class="marker-row">
+                <div class="marker-wrap marker-lost">
+                  <div class="marker-wave"></div>
+                  <div class="marker-core"></div>
+                  <div class="marker-label">黑色钱包</div>
+                </div>
+                <div class="marker-wrap marker-found">
+                  <div class="marker-wave"></div>
+                  <div class="marker-core"></div>
+                  <div class="marker-label">学生证</div>
+                </div>
+              </div>
+              <div class="marker-row">
+                <div class="marker-wrap marker-lost">
+                  <div class="marker-wave"></div>
+                  <div class="marker-core"></div>
+                  <div class="marker-label">黑色双肩包</div>
+                </div>
+                <div class="marker-wrap marker-found">
+                  <div class="marker-wave"></div>
+                  <div class="marker-core"></div>
+                  <div class="marker-label">iPhone 15</div>
+                </div>
+              </div>
+            </div>
+            <div class="map-placeholder">
+              <div class="map-placeholder-icon">🗺️</div>
+              <div class="map-placeholder-text">高德地图集成区域</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 个人中心 ==================== -->
+      <section class="screen profile-screen" id="profile">
+        <div class="profile-topbar">
+          <div class="topbar-left">
+            <img src="https://via.placeholder.com/44x44/33ccff/ffffff?text=校" alt="校徽" class="logo-img">
+            <span class="topbar-title">校园失物招领与位置追踪系统</span>
+          </div>
+          <div class="topbar-right">
+            <button class="avatar-btn" onclick="showToast('当前页面', 'success')">张</button>
+          </div>
+        </div>
+        <div class="profile-container">
+          <div class="profile-sidebar">
+            <div class="profile-avatar">张</div>
+            <div class="profile-username">张三</div>
+            <div class="profile-userid">ID: 10001</div>
+            <div class="profile-nav-buttons">
+              <button class="profile-nav-btn active">📊 我的数据</button>
+              <button class="profile-nav-btn" onclick="switchProfileNav(this)">✏️ 修改资料</button>
+              <button class="profile-nav-btn" onclick="switchProfileNav(this)">🔒 账号安全</button>
+              <button class="profile-nav-btn" onclick="switchProfileNav(this)">💬 消息中心</button>
+              <button class="profile-nav-btn" onclick="switchProfileNav(this)">ℹ️ 关于我们</button>
+            </div>
+            <div class="profile-logout">
+              <button class="profile-logout-btn" onclick="showToast('退出登录成功', 'success')">🚪 退出登录</button>
+            </div>
+          </div>
+          <div class="profile-main">
+            <div class="profile-content-panel">
+              <div class="profile-panel-header">
+                <span class="profile-panel-tab">📊 我的数据</span>
+              </div>
+              <div class="profile-info-grid">
+                <div class="profile-info-item">
+                  <span class="info-label">用户名：</span>
+                  <span class="info-value">张三</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="info-label">邮箱：</span>
+                  <span class="info-value">zhangsan@example.com</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="info-label">手机号：</span>
+                  <span class="info-value">138****8888</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="info-label">班级：</span>
+                  <span class="info-value">空信242班</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="info-label">发布物品：</span>
+                  <span class="info-value">5 件</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="info-label">成功找回：</span>
+                  <span class="info-value">3 件</span>
+                </div>
+              </div>
+              <table class="profile-data-table">
+                <thead>
+                  <tr>
+                    <th>物品名称</th>
+                    <th>类型</th>
+                    <th>发布时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>黑色钱包</td>
+                    <td><span class="status-badge badge-lost">失物</span></td>
+                    <td>2024-05-26 10:00</td>
+                    <td><span class="status-badge-admin status-pending">待认领</span></td>
+                    <td>
+                      <a class="table-action-btn edit" onclick="showToast('编辑物品', 'success')">编辑</a>
+                      <a class="table-action-btn delete" onclick="showToast('删除物品', 'error')">删除</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>学生证</td>
+                    <td><span class="status-badge badge-found">拾物</span></td>
+                    <td>2024-05-25 14:30</td>
+                    <td><span class="status-badge-admin status-approved">已归还</span></td>
+                    <td>
+                      <a class="table-action-btn edit" onclick="showToast('编辑物品', 'success')">编辑</a>
+                      <a class="table-action-btn delete" onclick="showToast('删除物品', 'error')">删除</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>iPad Air</td>
+                    <td><span class="status-badge badge-found">拾物</span></td>
+                    <td>2024-05-24 09:15</td>
+                    <td><span class="status-badge-admin status-pending">待认领</span></td>
+                    <td>
+                      <a class="table-action-btn edit" onclick="showToast('编辑物品', 'success')">编辑</a>
+                      <a class="table-action-btn delete" onclick="showToast('删除物品', 'error')">删除</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 后台管理 ==================== -->
+      <section class="screen admin-screen" id="admin">
+        <div class="admin-topbar">
+          <div class="topbar-left">
+            <img src="https://via.placeholder.com/44x44/33ccff/ffffff?text=校" alt="校徽" class="logo-img">
+            <span class="admin-title">后台管理系统</span>
+          </div>
+          <button class="admin-logout" onclick="showToast('退出登录成功', 'success')">退出后台</button>
+        </div>
+        <div class="admin-container">
+          <div class="admin-toolbar">
+            <input type="text" placeholder="检索：输入关键词（支持所有字段）">
+            <select onchange="showToast('切换数据表', 'success')">
+              <option>失物/招领信息表</option>
+              <option>认领记录表</option>
+              <option>认领表单审核表</option>
+              <option>归还表单审核表</option>
+              <option>用户信息表</option>
+              <option>物品分类表</option>
+              <option>地理位置表</option>
+            </select>
+            <button onclick="showToast('清空检索条件', 'success')">清空检索</button>
+            <button class="primary" onclick="showToast('新增数据行', 'success')">+ 新增</button>
+            <button onclick="showToast('刷新数据', 'success')">🔄 刷新</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>物品ID</th>
+                  <th>物品标题</th>
+                  <th>类型</th>
+                  <th>发布者</th>
+                  <th>发布时间</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10001</td>
+                  <td>黑色钱包</td>
+                  <td><span class="status-badge badge-lost">失物</span></td>
+                  <td>张三</td>
+                  <td>2024-05-26 10:00</td>
+                  <td><span class="status-badge-admin status-pending">待审核</span></td>
+                  <td class="admin-ops">
+                    <button class="view-btn" onclick="showToast('查看详情', 'success')">查看</button>
+                    <button class="approve-btn" onclick="showToast('审核通过', 'success')">通过</button>
+                    <button class="reject-btn" onclick="showToast('审核拒绝', 'warning')">拒绝</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>10002</td>
+                  <td>学生证</td>
+                  <td><span class="status-badge badge-found">拾物</span></td>
+                  <td>李四</td>
+                  <td>2024-05-25 14:30</td>
+                  <td><span class="status-badge-admin status-approved">已通过</span></td>
+                  <td class="admin-ops">
+                    <button class="view-btn" onclick="showToast('查看详情', 'success')">查看</button>
+                    <button class="delete-btn" onclick="showToast('删除数据', 'error')">删除</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>10003</td>
+                  <td>iPhone 15</td>
+                  <td><span class="status-badge badge-found">拾物</span></td>
+                  <td>王五</td>
+                  <td>2024-05-25 09:15</td>
+                  <td><span class="status-badge-admin status-pending">待审核</span></td>
+                  <td class="admin-ops">
+                    <button class="view-btn" onclick="showToast('查看详情', 'success')">查看</button>
+                    <button class="approve-btn" onclick="showToast('审核通过', 'success')">通过</button>
+                    <button class="reject-btn" onclick="showToast('审核拒绝', 'warning')">拒绝</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>10004</td>
+                  <td>蓝色笔记本</td>
+                  <td><span class="status-badge badge-lost">失物</span></td>
+                  <td>赵六</td>
+                  <td>2024-05-24 16:45</td>
+                  <td><span class="status-badge-admin status-approved">已通过</span></td>
+                  <td class="admin-ops">
+                    <button class="view-btn" onclick="showToast('查看详情', 'success')">查看</button>
+                    <button class="delete-btn" onclick="showToast('删除数据', 'error')">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // 导航切换
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const screenId = this.getAttribute('data-screen');
+
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+      });
+    });
+
+    // 登录标签切换
+    function switchLoginTab(btn, formType) {
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // 隐藏所有表单
+      document.querySelectorAll('.form-content').forEach(form => {
+        form.style.display = 'none';
+      });
+      
+      // 显示对应表单
+      const formId = formType + '-form';
+      const targetForm = document.getElementById(formId);
+      if (targetForm) {
+        targetForm.style.display = 'block';
+      }
+      
+      showToast('切换到' + btn.textContent, 'success');
+    }
+
+    // 刷新验证码
+    function refreshCaptcha(box) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let result = '';
+      for (let i = 0; i < 5; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      box.textContent = result;
+    }
+
+    // 筛选切换
+    function switchFilter(btn) {
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showToast('筛选：' + btn.textContent, 'success');
+    }
+
+    // 个人中心导航切换
+    function switchProfileNav(btn) {
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      showToast('切换到' + btn.textContent.replace(/^[^\s]+\s/, ''), 'success');
+    }
+
+    // Toast提示
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + type;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
