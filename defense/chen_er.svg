@@ -1,0 +1,776 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="185 65 935 730" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="eg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d2137"/>
+      <stop offset="100%" stop-color="#1a3a2a"/>
+    </linearGradient>
+    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a3a"/>
+      <stop offset="100%" stop-color="#1a2a4a"/>
+    </linearGradient>
+  </defs>
+
+
+  <!-- ===== EDGES ===== -->
+  <line id="j2FKxq7hMQm0A9dzhpjK-3" x1="615.0" y1="360.0" x2="560.0" y2="280.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-15" x1="615.0" y1="360.0" x2="680.0" y2="130.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-17" x1="540.0" y1="510.0" x2="485.0" y2="610.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-34" x1="615.0" y1="360.0" x2="470.0" y2="260.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-40" x1="615.0" y1="360.0" x2="470.0" y2="380.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-63" x1="615.0" y1="360.0" x2="470.0" y2="430.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-76" x1="615.0" y1="360.0" x2="454.0" y2="310.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-79" x1="490.0" y1="480.0" x2="345.0" y2="580.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-110" x1="740.0" y1="370.0" x2="875.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-119" x1="615.0" y1="360.0" x2="680.0" y2="320.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-123" x1="615.0" y1="360.0" x2="705.0" y2="480.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-177" x1="615.0" y1="360.0" x2="620.0" y2="480.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-4" x1="560.0" y1="280.0" x2="615.0" y2="360.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-151" x1="1060.0" y1="120.0" x2="1060.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-13" x1="680.0" y1="130.0" x2="1060.0" y2="120.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-89" x1="875.0" y1="370.0" x2="805.0" y2="440.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-19" x1="615.0" y1="360.0" x2="540.0" y2="510.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-37" x1="470.0" y1="260.0" x2="345.0" y2="230.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-43" x1="470.0" y1="380.0" x2="345.0" y2="420.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-53" x1="345.0" y1="420.0" x2="345.0" y2="490.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-192" x1="345.0" y1="420.0" x2="245.0" y2="510.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-54" x1="345.0" y1="580.0" x2="345.0" y2="490.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-84" x1="345.0" y1="580.0" x2="330.0" y2="660.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-65" x1="470.0" y1="430.0" x2="345.0" y2="420.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-71" x1="454.0" y1="310.0" x2="345.0" y2="280.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-187" x1="345.0" y1="280.0" x2="345.0" y2="350.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-198" x1="345.0" y1="280.0" x2="245.0" y2="350.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-86" x1="330.0" y1="660.0" x2="345.0" y2="580.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-92" x1="805.0" y1="440.0" x2="805.0" y2="530.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-132" x1="875.0" y1="370.0" x2="995.0" y2="480.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-139" x1="875.0" y1="370.0" x2="900.0" y2="440.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-112" x1="615.0" y1="360.0" x2="740.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-115" x1="680.0" y1="320.0" x2="735.0" y2="260.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-146" x1="735.0" y1="260.0" x2="795.0" y2="320.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-213" x1="735.0" y1="260.0" x2="818.8" y2="270.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-163" x1="705.0" y1="590.0" x2="705.0" y2="670.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-168" x1="705.0" y1="590.0" x2="850.0" y2="590.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-125" x1="705.0" y1="480.0" x2="705.0" y2="590.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-134" x1="995.0" y1="480.0" x2="995.0" y2="590.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-156" x1="995.0" y1="590.0" x2="995.0" y2="670.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-141" x1="900.0" y1="440.0" x2="900.0" y2="530.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-147" x1="795.0" y1="320.0" x2="875.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-152" x1="1060.0" y1="370.0" x2="875.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-159" x1="995.0" y1="670.0" x2="995.0" y2="760.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-164" x1="705.0" y1="670.0" x2="705.0" y2="760.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-169" x1="850.0" y1="590.0" x2="995.0" y2="590.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-178" x1="620.0" y1="480.0" x2="705.0" y2="590.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-188" x1="345.0" y1="350.0" x2="345.0" y2="420.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-183" x1="615.0" y1="360.0" x2="490.0" y2="480.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-193" x1="245.0" y1="510.0" x2="245.0" y2="580.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-199" x1="245.0" y1="350.0" x2="245.0" y2="420.0"
+        stroke="#00ffaa" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-3" x1="912.5" y1="250.0" x2="890.0" y2="170.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-4" x1="912.5" y1="250.0" x2="890.0" y2="170.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-16" x1="912.5" y1="250.0" x2="830.0" y2="215.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-209" x1="997.5" y1="190.0" x2="912.5" y2="250.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-210" x1="997.5" y1="190.0" x2="1060.0" y2="120.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-214" x1="818.8" y1="270.0" x2="912.5" y2="250.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-217" x1="875.0" y1="310.0" x2="912.5" y2="250.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="j2FKxq7hMQm0A9dzhpjK-219" x1="875.0" y1="310.0" x2="875.0" y2="370.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-11" x1="675.0" y1="225.0" x2="720.0" y2="200.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-8" x1="675.0" y1="225.0" x2="615.0" y2="360.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+  <line id="DaYXloyW47TROGKNhwXZ-17" x1="830.0" y1="215.0" x2="752.5" y2="190.0"
+        stroke="#4dadff" stroke-width="1.5"/>
+
+  <!-- ===== CARDINALITY LABELS ===== -->
+  <g>
+    <circle cx="587.5" cy="320.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="587.5" y="323.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="647.5" cy="245.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="647.5" y="248.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="512.5" cy="560.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="512.5" y="563.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="542.5" cy="310.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="542.5" y="313.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="542.5" cy="370.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="542.5" y="373.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="542.5" cy="395.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="542.5" y="398.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="534.5" cy="335.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="534.5" y="338.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="417.5" cy="530.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="417.5" y="533.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="807.5" cy="370.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="807.5" y="373.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="647.5" cy="340.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="647.5" y="343.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="660.0" cy="420.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="660.0" y="423.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="617.5" cy="420.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="617.5" y="423.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="587.5" cy="320.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="587.5" y="323.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="1060.0" cy="245.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="1060.0" y="248.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="870.0" cy="125.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="870.0" y="128.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="840.0" cy="405.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="840.0" y="408.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="577.5" cy="435.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="577.5" y="438.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="407.5" cy="245.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="407.5" y="248.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="407.5" cy="400.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="407.5" y="403.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="345.0" cy="455.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="345.0" y="458.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="295.0" cy="465.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="295.0" y="468.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="345.0" cy="535.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="345.0" y="538.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="337.5" cy="620.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="337.5" y="623.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="407.5" cy="425.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="407.5" y="428.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="399.5" cy="295.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="399.5" y="298.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="345.0" cy="315.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="345.0" y="318.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="295.0" cy="315.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="295.0" y="318.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="337.5" cy="620.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="337.5" y="623.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="805.0" cy="485.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="805.0" y="488.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="935.0" cy="425.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="935.0" y="428.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="887.5" cy="405.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="887.5" y="408.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="677.5" cy="365.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="677.5" y="368.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="707.5" cy="290.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="707.5" y="293.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="765.0" cy="290.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="765.0" y="293.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="776.9" cy="265.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="776.9" y="268.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="705.0" cy="630.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="705.0" y="633.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="777.5" cy="590.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="777.5" y="593.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="705.0" cy="535.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="705.0" y="538.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="995.0" cy="535.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="995.0" y="538.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="995.0" cy="630.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="995.0" y="633.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="900.0" cy="485.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="900.0" y="488.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="835.0" cy="345.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="835.0" y="348.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="967.5" cy="370.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="967.5" y="373.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="995.0" cy="715.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="995.0" y="718.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="705.0" cy="715.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="705.0" y="718.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="922.5" cy="590.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="922.5" y="593.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="662.5" cy="535.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="662.5" y="538.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="345.0" cy="385.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="345.0" y="388.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="552.5" cy="420.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="552.5" y="423.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="245.0" cy="545.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="245.0" y="548.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="245.0" cy="385.0" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="245.0" y="388.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="901.2" cy="210.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="901.2" y="213.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="901.2" cy="210.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="901.2" y="213.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="871.2" cy="232.5" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="871.2" y="235.5" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="955.0" cy="220.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="955.0" y="223.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="1028.8" cy="155.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="1028.8" y="158.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="865.6" cy="260.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="865.6" y="263.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="893.8" cy="280.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="893.8" y="283.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">m</text>
+  </g>
+  <g>
+    <circle cx="875.0" cy="340.0" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="875.0" y="343.0" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="697.5" cy="212.5" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="697.5" y="215.5" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+  <g>
+    <circle cx="645.0" cy="292.5" r="9" fill="#00ffaa" opacity="0.9"/>
+    <text x="645.0" y="295.5" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">1</text>
+  </g>
+  <g>
+    <circle cx="791.2" cy="202.5" r="9" fill="#ff9500" opacity="0.9"/>
+    <text x="791.2" y="205.5" fill="#000000" font-size="11" font-family="Arial, sans-serif"
+          text-anchor="middle" dominant-baseline="middle" font-weight="bold">n</text>
+  </g>
+
+  <!-- ===== ENTITIES (Rectangles) ===== -->
+  <!-- Entity: 预约 -->
+  <g id="DaYXloyW47TROGKNhwXZ-10">
+    <rect x="717.5" y="170.0" width="70.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="752.5" y="194.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">预约</text>
+  </g>
+  <!-- Entity: 用户 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-1">
+    <rect x="570.0" y="340.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="615.0" y="364.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">用户</text>
+  </g>
+  <!-- Entity: 失物/拾物 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-109">
+    <rect x="830.0" y="350.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="875.0" y="374.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">失物/拾物</text>
+  </g>
+  <!-- Entity: 认领表单 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-118">
+    <rect x="700.0" y="240.0" width="70.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="735.0" y="264.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">认领表单</text>
+  </g>
+  <!-- Entity: 归还表单 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-12">
+    <rect x="1015.0" y="100.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="1060.0" y="124.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">归还表单</text>
+  </g>
+  <!-- Entity: 报修 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-121">
+    <rect x="660.0" y="570.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="705.0" y="594.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">报修</text>
+  </g>
+  <!-- Entity: 校区 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-133">
+    <rect x="950.0" y="570.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="995.0" y="594.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">校区</text>
+  </g>
+  <!-- Entity: 地理位置 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-140">
+    <rect x="855.0" y="510.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="900.0" y="534.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">地理位置</text>
+  </g>
+  <!-- Entity: 导航节点 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-158">
+    <rect x="950.0" y="740.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="995.0" y="764.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">导航节点</text>
+  </g>
+  <!-- Entity: 失物/拾取信息 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-16">
+    <rect x="440.0" y="590.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="485.0" y="614.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">失物/拾取信息</text>
+  </g>
+  <!-- Entity: 报修分类 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-162">
+    <rect x="660.0" y="740.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="705.0" y="764.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">报修分类</text>
+  </g>
+  <!-- Entity: 社区图片 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-181">
+    <rect x="200.0" y="560.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="245.0" y="584.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">社区图片</text>
+  </g>
+  <!-- Entity: 社区通知 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-197">
+    <rect x="200.0" y="400.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="245.0" y="424.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">社区通知</text>
+  </g>
+  <!-- Entity: 管理员 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-202">
+    <rect x="867.5" y="230.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="912.5" y="254.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">管理员</text>
+  </g>
+  <!-- Entity: 通知信息 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-36">
+    <rect x="300.0" y="210.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="345.0" y="234.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">通知信息</text>
+  </g>
+  <!-- Entity: 社区帖子 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-42">
+    <rect x="300.0" y="400.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="345.0" y="424.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">社区帖子</text>
+  </g>
+  <!-- Entity: 帖子评论 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-51">
+    <rect x="300.0" y="560.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="345.0" y="584.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">帖子评论</text>
+  </g>
+  <!-- Entity: 社区评论 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-74">
+    <rect x="300.0" y="260.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="345.0" y="284.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">社区评论</text>
+  </g>
+  <!-- Entity: 物品分类 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-91">
+    <rect x="760.0" y="510.0" width="90.0" height="40.0" rx="4" ry="4"
+          fill="url(#eg)" stroke="#00ffaa" stroke-width="1.5"/>
+    <text x="805.0" y="534.0" fill="#ffffff" font-size="13" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">物品分类</text>
+  </g>
+
+  <!-- ===== RELATIONSHIPS (Diamonds) ===== -->
+  <!-- Relationship: 赋予 -->
+  <g id="DaYXloyW47TROGKNhwXZ-1">
+    <polygon points="890.0,150.0 930.0,170.0 890.0,190.0 850.0,170.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="890.0" y="174.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">赋予</text>
+  </g>
+  <!-- Relationship: 审核 -->
+  <g id="DaYXloyW47TROGKNhwXZ-15">
+    <polygon points="830.0,200.0 855.0,215.0 830.0,230.0 805.0,215.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="830.0" y="219.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">审核</text>
+  </g>
+  <!-- Relationship: 提交 -->
+  <g id="DaYXloyW47TROGKNhwXZ-7">
+    <polygon points="675.0,210.0 700.0,225.0 675.0,240.0 650.0,225.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="675.0" y="229.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">提交</text>
+  </g>
+  <!-- Relationship: 发布 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-111">
+    <polygon points="740.0,350.0 780.0,370.0 740.0,390.0 700.0,370.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="740.0" y="374.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">发布</text>
+  </g>
+  <!-- Relationship: 提交 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-117">
+    <polygon points="680.0,300.0 720.0,320.0 680.0,340.0 640.0,320.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="680.0" y="324.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">提交</text>
+  </g>
+  <!-- Relationship: 申请 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-122">
+    <polygon points="705.0,460.0 745.0,480.0 705.0,500.0 665.0,480.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="705.0" y="484.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">申请</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-131">
+    <polygon points="995.0,460.0 1032.5,480.0 995.0,500.0 957.5,480.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="995.0" y="484.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-138">
+    <polygon points="900.0,420.0 940.0,440.0 900.0,460.0 860.0,440.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="900.0" y="444.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: 提交 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-14">
+    <polygon points="680.0,110.0 720.0,130.0 680.0,150.0 640.0,130.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="680.0" y="134.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">提交</text>
+  </g>
+  <!-- Relationship: 对应 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-145">
+    <polygon points="795.0,300.0 835.0,320.0 795.0,340.0 755.0,320.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="795.0" y="324.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">对应</text>
+  </g>
+  <!-- Relationship: 对应 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-150">
+    <polygon points="1060.0,350.0 1100.0,370.0 1060.0,390.0 1020.0,370.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="1060.0" y="374.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">对应</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-155">
+    <polygon points="995.0,650.0 1035.0,670.0 995.0,690.0 955.0,670.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="995.0" y="674.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: 属于 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-161">
+    <polygon points="705.0,650.0 745.0,670.0 705.0,690.0 665.0,670.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="705.0" y="674.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">属于</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-167">
+    <polygon points="850.0,570.0 890.0,590.0 850.0,610.0 810.0,590.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="850.0" y="594.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: (维修工)处理 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-176">
+    <polygon points="620.0,460.0 660.0,480.0 620.0,500.0 580.0,480.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="620.0" y="484.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">(维修工)处理</text>
+  </g>
+  <!-- Relationship: 查看 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-18">
+    <polygon points="540.0,490.0 580.0,510.0 540.0,530.0 500.0,510.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="540.0" y="514.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">查看</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-182">
+    <polygon points="345.0,330.0 385.0,350.0 345.0,370.0 305.0,350.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="345.0" y="354.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: 所属 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-191">
+    <polygon points="245.0,490.0 285.0,510.0 245.0,530.0 205.0,510.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="245.0" y="514.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">所属</text>
+  </g>
+  <!-- Relationship: 产生 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-196">
+    <polygon points="245.0,330.0 285.0,350.0 245.0,370.0 205.0,350.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="245.0" y="354.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">产生</text>
+  </g>
+  <!-- Relationship: 用户关注 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-2">
+    <polygon points="560.0,260.0 600.0,280.0 560.0,300.0 520.0,280.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="560.0" y="284.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">用户关注</text>
+  </g>
+  <!-- Relationship: 审核 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-205">
+    <polygon points="997.5,170.0 1037.5,190.0 997.5,210.0 957.5,190.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="997.5" y="194.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">审核</text>
+  </g>
+  <!-- Relationship: 审核 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-207">
+    <polygon points="818.75,250.0 850.0,270.0 818.75,290.0 787.5,270.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="818.75" y="274.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">审核</text>
+  </g>
+  <!-- Relationship: 审核 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-208">
+    <polygon points="875.0,290.0 915.0,310.0 875.0,330.0 835.0,310.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="875.0" y="314.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">审核</text>
+  </g>
+  <!-- Relationship: 接收 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-33">
+    <polygon points="470.0,240.0 510.0,260.0 470.0,280.0 430.0,260.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="470.0" y="264.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">接收</text>
+  </g>
+  <!-- Relationship: 发布 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-39">
+    <polygon points="470.0,360.0 510.0,380.0 470.0,400.0 430.0,380.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="470.0" y="384.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">发布</text>
+  </g>
+  <!-- Relationship: 属于 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-52">
+    <polygon points="345.0,470.0 385.0,490.0 345.0,510.0 305.0,490.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="345.0" y="494.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">属于</text>
+  </g>
+  <!-- Relationship: 点赞 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-59">
+    <polygon points="470.0,410.0 510.0,430.0 470.0,450.0 430.0,430.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="470.0" y="434.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">点赞</text>
+  </g>
+  <!-- Relationship: 发表 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-73">
+    <polygon points="454.0,290.0 494.0,310.0 454.0,330.0 414.0,310.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="454.0" y="314.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">发表</text>
+  </g>
+  <!-- Relationship: 点赞 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-80">
+    <polygon points="490.0,460.0 530.0,480.0 490.0,500.0 450.0,480.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="490.0" y="484.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">点赞</text>
+  </g>
+  <!-- Relationship: 回复 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-83">
+    <polygon points="330.0,640.0 370.0,660.0 330.0,680.0 290.0,660.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="330.0" y="664.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">回复</text>
+  </g>
+  <!-- Relationship: 属于 -->
+  <g id="j2FKxq7hMQm0A9dzhpjK-88">
+    <polygon points="805.0,420.0 845.0,440.0 805.0,460.0 765.0,440.0" fill="url(#rg)" stroke="#4dadff" stroke-width="1.5"/>
+    <text x="805.0" y="444.0" fill="#ffffff" font-size="12" font-family="Microsoft YaHei, SimHei, sans-serif"
+          text-anchor="middle" dominant-baseline="middle">属于</text>
+  </g>
+
+</svg>
